@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learning Roadmap | AI-Powered Student Support</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --primary: #0f766e;
+      --primary-soft: #d1faf0;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #dfe7f4;
+      --shadow: 0 12px 25px rgba(15, 23, 42, 0.08);
+      --success: #166534;
+      --warning: #b45309;
+      --danger: #b91c1c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .topbar {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .brand { font-weight: 700; font-size: 1.1rem; }
+    .top-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .button {
+      border: none;
+      border-radius: 10px;
+      padding: 0.8rem 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .button.primary { background: var(--primary); color: white; }
+    .button.ghost { background: #f8fafc; color: var(--text); border: 1px solid var(--border); }
+    .container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1rem 3rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 1.4rem;
+    }
+    .card h2 { margin: 0 0 1rem; color: var(--primary); }
+    .empty-state {
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 2rem 1rem;
+      color: var(--muted);
+      background: #f8fafc;
+      text-align: center;
+    }
+    .roadmap-list { display: grid; gap: 1rem; margin-top: 1rem; }
+    .roadmap-step {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    }
+    .roadmap-step.in-progress {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    }
+    .roadmap-step.not-started {
+      background: #f8fafc;
+    }
+    .step-header { display: flex; justify-content: space-between; align-items: start; }
+    .step-title { margin: 0; }
+    .status-badge {
+      display: inline-block;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+    .step-detail { color: var(--muted); font-size: 0.9rem; margin: 0.5rem 0 0; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">AI-Powered Student Support</div>
+    <div class="top-actions">
+      <button class="button ghost" id="backToDashboardBtn" type="button">Dashboard</button>
+      <button class="button ghost" id="logoutButton" type="button">Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>🗺️ My Learning Roadmap</h2>
+      <p style="color: var(--muted); margin-top: 0;">A structured learning path with all the skills you need to master for your career goal.</p>
+
+      <div id="roadmapContainer" style="margin-top: 2rem;">
+        <div class="empty-state">Complete your career goal and skill analysis to generate your roadmap.</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API_BASE = 'http://localhost:8001';
+
+    function getAuthHeaders() {
+      let token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+      
+      if (!token) {
+        const urlParams = new URLSearchParams(window.location.search);
+        token = urlParams.get('token');
+      }
+      
+      return {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      };
+    }
+
+    async function apiFetch(url, options = {}) {
+      const response = await fetch(url, {
+        ...options,
+        headers: { ...getAuthHeaders(), ...(options.headers || {}) },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || 'Request failed');
+      return data;
+    }
+
+    async function loadRoadmap() {
+      try {
+        const data = await apiFetch(`${API_BASE}/api/student/learning-roadmap`);
+        const container = document.getElementById('roadmapContainer');
+
+        if (!data.roadmap || data.roadmap.length === 0) {
+          container.innerHTML = '<div class="empty-state">Complete your career goal and skill analysis to generate your roadmap.</div>';
+          return;
+        }
+
+        container.innerHTML = '<div class="roadmap-list">' + data.roadmap.map(step => `
+          <div class="roadmap-step ${step.status === 'Completed' ? 'completed' : step.status === 'In Progress' ? 'in-progress' : 'not-started'}">
+            <div class="step-header">
+              <div>
+                <h4 class="step-title">${step.step}: ${step.skill}</h4>
+                <div class="step-detail">${step.description}</div>
+                <div class="step-detail"><strong>Difficulty:</strong> ${step.difficulty} | <strong>Time:</strong> ${step.estimated_time}</div>
+              </div>
+              <div class="status-badge">${step.status}</div>
+            </div>
+          </div>
+        `).join('') + '</div>';
+      } catch (error) {
+        document.getElementById('roadmapContainer').innerHTML = 
+          '<div class="empty-state">Complete your career goal and skill analysis to generate your roadmap.</div>';
+      }
+    }
+
+    document.getElementById('backToDashboardBtn').addEventListener('click', () => {
+      window.location.href = 'dashboard.html';
+    });
+    document.getElementById('logoutButton').addEventListener('click', () => {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('currentUser');
+      window.location.href = 'index.html';
+    });
+
+    loadRoadmap();
+  </script>
+</body>
+</html>

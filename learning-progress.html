@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learning Progress | AI-Powered Student Support</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --primary: #ec4899;
+      --primary-soft: #fce7f3;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #dfe7f4;
+      --shadow: 0 12px 25px rgba(15, 23, 42, 0.08);
+      --success: #166534;
+      --warning: #b45309;
+      --danger: #b91c1c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .topbar {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .brand { font-weight: 700; font-size: 1.1rem; }
+    .top-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .button {
+      border: none;
+      border-radius: 10px;
+      padding: 0.8rem 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .button.ghost { background: #f8fafc; color: var(--text); border: 1px solid var(--border); }
+    .container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1rem 3rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 1.4rem;
+    }
+    .card h2 { margin: 0 0 1rem; color: var(--primary); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .stat-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+    .label { color: var(--muted); font-size: 0.8rem; margin-bottom: 0.4rem; }
+    .value { font-size: 1.7rem; font-weight: 700; }
+    .progress {
+      height: 12px;
+      background: #eef2ff;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 0.6rem;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), #f43f5e);
+      border-radius: inherit;
+    }
+    .empty-state {
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 2rem 1rem;
+      color: var(--muted);
+      background: #f8fafc;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">AI-Powered Student Support</div>
+    <div class="top-actions">
+      <button class="button ghost" id="backToDashboardBtn" type="button">Dashboard</button>
+      <button class="button ghost" id="logoutButton" type="button">Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>📈 Learning Progress</h2>
+      <p style="color: var(--muted); margin-top: 0;">Track your progress through courses and skill assessments.</p>
+
+      <div class="grid" style="margin-top: 1.5rem;">
+        <div class="stat-box">
+          <div class="label">Overall Learning Progress</div>
+          <div class="value" id="overallProgress">0%</div>
+          <div class="progress"><div id="overallBar" class="progress-bar" style="width:0%"></div></div>
+        </div>
+        <div class="stat-box">
+          <div class="label">Skills Completed</div>
+          <div class="value" id="skillsCompleted">0 / 0</div>
+        </div>
+        <div class="stat-box">
+          <div class="label">Courses Completed</div>
+          <div class="value" id="coursesCompleted">0 / 0</div>
+        </div>
+        <div class="stat-box">
+          <div class="label">Roadmap Progress</div>
+          <div class="value" id="roadmapProgress">0 / 0</div>
+        </div>
+      </div>
+
+      <div id="progressContainer" style="margin-top: 2rem;">
+        <div class="empty-state">No learning progress yet. Complete your profile and take assessments to track your progress.</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API_BASE = 'http://localhost:8001';
+
+    function getAuthHeaders() {
+      let token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+      
+      if (!token) {
+        const urlParams = new URLSearchParams(window.location.search);
+        token = urlParams.get('token');
+      }
+      
+      return {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      };
+    }
+
+    async function apiFetch(url, options = {}) {
+      const response = await fetch(url, {
+        ...options,
+        headers: { ...getAuthHeaders(), ...(options.headers || {}) },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || 'Request failed');
+      return data;
+    }
+
+    async function loadProgress() {
+      try {
+        const data = await apiFetch(`${API_BASE}/api/student/learning-progress`);
+
+        document.getElementById('overallProgress').textContent = `${data.overall_learning_progress || 0}%`;
+        document.getElementById('overallBar').style.width = `${data.overall_learning_progress || 0}%`;
+        document.getElementById('skillsCompleted').textContent = data.skills_completed || '0 / 0';
+        document.getElementById('coursesCompleted').textContent = data.courses_completed || '0 / 0';
+        document.getElementById('roadmapProgress').textContent = data.roadmap_progress || '0 / 0';
+
+        const container = document.getElementById('progressContainer');
+        if (!data.missing_skills || data.missing_skills.length === 0) {
+          container.innerHTML = '<div class="empty-state">No missing skills. You are progressing well on your learning path!</div>';
+        } else {
+          container.innerHTML = '<p style="color: var(--muted); margin-top: 0;"><strong>Skills to Learn:</strong></p><div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">' + 
+            data.missing_skills.map(skill => 
+              `<span style="display: inline-block; background: var(--primary-soft); color: var(--primary); padding: 0.4rem 0.8rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600;">${skill}</span>`
+            ).join('') + 
+            '</div>';
+        }
+      } catch (error) {
+        document.getElementById('progressContainer').innerHTML = 
+          '<div class="empty-state">No learning progress yet. Complete your profile and take assessments to track your progress.</div>';
+      }
+    }
+
+    document.getElementById('backToDashboardBtn').addEventListener('click', () => {
+      window.location.href = 'dashboard.html';
+    });
+    document.getElementById('logoutButton').addEventListener('click', () => {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('currentUser');
+      window.location.href = 'index.html';
+    });
+
+    loadProgress();
+  </script>
+</body>
+</html>

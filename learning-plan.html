@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Learning Plan | AI-Powered Student Support</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --primary: #f59e0b;
+      --primary-soft: #fef3c7;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #dfe7f4;
+      --shadow: 0 12px 25px rgba(15, 23, 42, 0.08);
+      --success: #166534;
+      --warning: #b45309;
+      --danger: #b91c1c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .topbar {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .brand { font-weight: 700; font-size: 1.1rem; }
+    .top-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .button {
+      border: none;
+      border-radius: 10px;
+      padding: 0.8rem 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .button.primary { background: var(--primary); color: white; }
+    .button.ghost { background: #f8fafc; color: var(--text); border: 1px solid var(--border); }
+    .container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1rem 3rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 1.4rem;
+    }
+    .card h2 { margin: 0 0 1rem; color: var(--primary); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .stat-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+    .label { color: var(--muted); font-size: 0.8rem; margin-bottom: 0.4rem; }
+    .value { font-size: 1.3rem; font-weight: 700; }
+    .form-row {
+      display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 1rem 0;
+    }
+    select {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.8rem 0.9rem;
+      background: white;
+      color: var(--text);
+      flex: 1;
+      min-width: 200px;
+    }
+    .empty-state {
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 2rem 1rem;
+      color: var(--muted);
+      background: #f8fafc;
+      text-align: center;
+    }
+    .plan-list { display: grid; gap: 1rem; margin-top: 1rem; }
+    .plan-day {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      background: #f8fafc;
+    }
+    .day-header { font-weight: 700; color: var(--primary); margin: 0 0 0.5rem; }
+    .day-detail { color: var(--muted); font-size: 0.9rem; margin: 0.3rem 0; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">AI-Powered Student Support</div>
+    <div class="top-actions">
+      <button class="button ghost" id="backToDashboardBtn" type="button">Dashboard</button>
+      <button class="button ghost" id="logoutButton" type="button">Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>📅 My Learning Plan</h2>
+      <p style="color: var(--muted); margin-top: 0;">Generate your personalized weekly learning schedule.</p>
+
+      <div class="grid" style="margin-top: 1.5rem;">
+        <div class="stat-box">
+          <div class="label">Daily Study Time</div>
+          <div class="value" id="dailyStudyTime">1 hour</div>
+        </div>
+        <div class="stat-box">
+          <div class="label">Learning Preference</div>
+          <div class="value" id="learningPreference" style="font-size: 1rem;">Mixed</div>
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-top: 1.5rem;">
+        <select id="studyTime">
+          <option value="30 minutes">30 minutes</option>
+          <option value="1 hour" selected>1 hour</option>
+          <option value="2 hours">2 hours</option>
+          <option value="3+ hours">3+ hours</option>
+        </select>
+        <select id="learningPref">
+          <option value="Mixed" selected>Mixed (Theory + Practice)</option>
+          <option value="Theory">Theory First</option>
+          <option value="Practice">Practice Only</option>
+          <option value="Projects">Project-Based</option>
+        </select>
+        <button class="button primary" type="button" id="generateBtn">Generate Plan</button>
+      </div>
+
+      <div id="planContainer" style="margin-top: 2rem;">
+        <div class="empty-state">Generate your personalized learning plan.</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API_BASE = 'http://localhost:8001';
+
+    function getAuthHeaders() {
+      let token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+      
+      if (!token) {
+        const urlParams = new URLSearchParams(window.location.search);
+        token = urlParams.get('token');
+      }
+      
+      return {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      };
+    }
+
+    async function apiFetch(url, options = {}) {
+      const response = await fetch(url, {
+        ...options,
+        headers: { ...getAuthHeaders(), ...(options.headers || {}) },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || 'Request failed');
+      return data;
+    }
+
+    async function loadPlan() {
+      try {
+        const payload = {
+          daily_study_time: document.getElementById('studyTime').value,
+          learning_preference: document.getElementById('learningPref').value,
+        };
+        const data = await apiFetch(`${API_BASE}/api/student/learning-plan`, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+
+        document.getElementById('dailyStudyTime').textContent = payload.daily_study_time;
+        document.getElementById('learningPreference').textContent = payload.learning_preference;
+
+        const container = document.getElementById('planContainer');
+        if (!data.plan || !data.plan.weekly_plan || data.plan.weekly_plan.length === 0) {
+          container.innerHTML = '<div class="empty-state">No learning plan generated yet.</div>';
+          return;
+        }
+
+        container.innerHTML = '<div class="plan-list">' + data.plan.weekly_plan.map(day => `
+          <div class="plan-day">
+            <div class="day-header">${day.day}</div>
+            <div class="day-detail"><strong>Focus:</strong> ${day.focus}</div>
+            <div class="day-detail"><strong>Plan:</strong> ${day.details}</div>
+          </div>
+        `).join('') + '</div>';
+      } catch (error) {
+        document.getElementById('planContainer').innerHTML = 
+          '<div class="empty-state">Generate your personalized learning plan by completing your profile and career goal.</div>';
+      }
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', loadPlan);
+    document.getElementById('backToDashboardBtn').addEventListener('click', () => {
+      window.location.href = 'dashboard.html';
+    });
+    document.getElementById('logoutButton').addEventListener('click', () => {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('currentUser');
+      window.location.href = 'index.html';
+    });
+
+    loadPlan();
+  </script>
+</body>
+</html>

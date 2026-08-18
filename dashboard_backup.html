@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | AI-Powered Student Support</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --bg: linear-gradient(135deg, #f0f4f8 0%, #e8f1f8 100%);
+      --card-bg: #ffffff;
+      --text: #1a202c;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 1.2rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      flex-shrink: 0;
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+
+    .logout-button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 1.2rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+
+    .logout-button:hover {
+      background: var(--primary-dark);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .hamburger {
+      display: none;
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    /* MAIN CONTAINER */
+    .main-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* LEFT SIDEBAR */
+    .sidebar {
+      width: 280px;
+      background: var(--card-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .sidebar-close {
+      display: none;
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 0;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      width: 100%;
+      padding: 1rem 1.2rem;
+      background: transparent;
+      border: none;
+      border-left: 3px solid transparent;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .menu-item:hover {
+      background: #f8fafc;
+      color: var(--primary);
+    }
+
+    .menu-item.active {
+      background: #eef4ff;
+      border-left-color: var(--primary);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .menu-item-icon {
+      font-size: 1.2rem;
+      width: 1.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-item-text {
+      flex: 1;
+    }
+
+    /* CONTENT AREA */
+    .content-area {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* SECTION CONTAINER */
+    .section-container {
+      flex: 1;
+      overflow-y: auto;
+      display: none;
+      padding: 2rem 1.5rem;
+    }
+
+    .section-container.active {
+      display: block;
+    }
+
+    /* WELCOME SECTION */
+    .welcome-section {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+    }
+
+    .welcome-label {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .user-name {
+      font-size: 2.2rem;
+      margin: 0.8rem 0 0;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .proverb {
+      margin-top: 1.2rem;
+      padding: 1rem 1.5rem;
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+      border-left: 4px solid #10b981;
+      border-radius: 8px;
+      color: #166534;
+      font-size: 0.98rem;
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    .status-message {
+      margin-top: 1rem;
+      padding: 0.8rem 1rem;
+      background: #ecfdf5;
+      color: #166534;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .status-message.error {
+      background: #fef2f2;
+      color: #991b1b;
+      border-left: 4px solid #dc2626;
+    }
+
+    /* IFRAME CONTAINER */
+    .iframe-container {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .feature-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: none;
+    }
+
+    .feature-iframe.active {
+      display: block;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .sidebar {
+        width: 240px;
+      }
+
+      .topbar {
+        padding: 1rem 1.5rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hamburger {
+        display: block;
+      }
+
+      .main-container {
+        flex-direction: row;
+      }
+
+      .sidebar {
+        width: 100%;
+        max-height: 0;
+        overflow: hidden;
+        border-right: none;
+        border-top: 1px solid var(--border);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: auto;
+        z-index: 999;
+      }
+
+      .sidebar.open {
+        max-height: 100vh;
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 999;
+        overflow-y: auto;
+      }
+
+      .sidebar.open .sidebar-close {
+        display: block;
+      }
+
+      .sidebar-header {
+        display: none;
+      }
+
+      .sidebar.open .sidebar-header {
+        display: block;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .sidebar.open {
+        background: rgba(255, 255, 255, 0.98);
+      }
+
+      .section-container {
+        padding: 1.5rem 1rem;
+      }
+
+      .welcome-section {
+        padding: 1.5rem;
+      }
+
+      .user-name {
+        font-size: 1.8rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .topbar {
+        padding: 0.8rem 1rem;
+      }
+
+      .brand {
+        font-size: 0.95rem;
+      }
+
+      .logout-button {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.85rem;
+      }
+
+      .welcome-section {
+        padding: 1.2rem;
+      }
+
+      .user-name {
+        font-size: 1.5rem;
+      }
+
+      .proverb {
+        font-size: 0.85rem;
+        padding: 0.8rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="brand">AI-Powered Student Support</div>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">☰</button>
+      <button class="logout-button" id="logoutButton">Logout</button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <div class="main-container">
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">&times;</button>
+      <div class="sidebar-header">Features</div>
+      <nav class="sidebar-menu">
+        <button type="button" class="menu-item active" data-section="welcome">
+          <span class="menu-item-icon">🏠</span>
+          <span class="menu-item-text">Dashboard</span>
+        </button>
+        <button type="button" class="menu-item" data-section="student-profile">
+          <span class="menu-item-icon">👤</span>
+          <span class="menu-item-text">Student Profile</span>
+        </button>
+        <button type="button" class="menu-item" data-section="skill-intelligence">
+          <span class="menu-item-icon">🎯</span>
+          <span class="menu-item-text">Skill Intelligence</span>
+        </button>
+        <button type="button" class="menu-item" data-section="courses">
+          <span class="menu-item-icon">📚</span>
+          <span class="menu-item-text">Recommended Courses</span>
+        </button>
+        <button type="button" class="menu-item" data-section="learning-roadmap">
+          <span class="menu-item-icon">🗺️</span>
+          <span class="menu-item-text">My Learning Roadmap</span>
+        </button>
+        <button type="button" class="menu-item" data-section="learning-plan">
+          <span class="menu-item-icon">📋</span>
+          <span class="menu-item-text">My Learning Plan</span>
+        </button>
+        <button type="button" class="menu-item" data-section="learning-progress">
+          <span class="menu-item-icon">📊</span>
+          <span class="menu-item-text">Learning Progress</span>
+        </button>
+        <button type="button" class="menu-item" data-section="skill-recommendations">
+          <span class="menu-item-icon">⭐</span>
+          <span class="menu-item-text">Next Best Skill</span>
+        </button>
+        <button type="button" class="menu-item" data-section="chat">
+          <span class="menu-item-icon">🤖</span>
+          <span class="menu-item-text">AI Student & Career Chatbox</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- CONTENT AREA (RIGHT) -->
+    <div class="content-area">
+      <!-- WELCOME SECTION -->
+      <div class="section-container active" id="welcomeSection">
+        <div class="welcome-section">
+          <div class="welcome-label">Dashboard</div>
+          <h1 class="user-name" id="userName">Welcome, Student</h1>
+          <div class="proverb" id="proverb">
+            "The beautiful thing about learning is that no one can take it away from you."
+          </div>
+          <div id="statusMessage" class="status-message">Loading your profile...</div>
+        </div>
+      </div>
+
+      <!-- FEATURE IFRAMES -->
+      <div class="iframe-container">
+        <iframe id="studentProfileFrame" class="feature-iframe" title="Student Profile"></iframe>
+        <iframe id="skillIntelligenceFrame" class="feature-iframe" title="Skill Intelligence"></iframe>
+        <iframe id="coursesFrame" class="feature-iframe" title="Recommended Courses"></iframe>
+        <iframe id="learningRoadmapFrame" class="feature-iframe" title="My Learning Roadmap"></iframe>
+        <iframe id="learningPlanFrame" class="feature-iframe" title="My Learning Plan"></iframe>
+        <iframe id="learningProgressFrame" class="feature-iframe" title="Learning Progress"></iframe>
+        <iframe id="skillRecommendationsFrame" class="feature-iframe" title="Next Best Skill"></iframe>
+        <iframe id="chatFrame" class="feature-iframe" title="AI Assistant"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const proverbs = [
+      "The beautiful thing about learning is that no one can take it away from you.",
+      "Education is not the filling of a pail, but the lighting of a fire.",
+      "Knowledge is power. Invest in yourself.",
+      "The capacity to learn is a gift; the ability to learn is a skill; the willingness to learn is a choice.",
+      "Education is the most powerful weapon which you can use to change the world.",
+      "Learning never exhausts the mind.",
+      "Your education is a dress rehearsal for a life that is yours to lead.",
+      "The expert in anything was once a beginner.",
+      "Knowledge is treasure, but practice is the key to it.",
+      "Study with the intention of becoming better. That's real learning."
+    ];
+
+    const featureMap = {
+      'student-profile': 'student-profile.html',
+      'skill-intelligence': 'skill-intelligence.html',
+      'courses': 'courses.html',
+      'learning-roadmap': 'learning-roadmap.html',
+      'learning-plan': 'learning-plan.html',
+      'learning-progress': 'learning-progress.html',
+      'skill-recommendations': 'skill-recommendations.html',
+      'chat': 'chat.html'
+    };
+
+    const frameIdMap = {
+      'student-profile': 'studentProfileFrame',
+      'skill-intelligence': 'skillIntelligenceFrame',
+      'courses': 'coursesFrame',
+      'learning-roadmap': 'learningRoadmapFrame',
+      'learning-plan': 'learningPlanFrame',
+      'learning-progress': 'learningProgressFrame',
+      'skill-recommendations': 'skillRecommendationsFrame',
+      'chat': 'chatFrame'
+    };
+
+    // DOM Elements
+    const hamburger = document.getElementById('hamburger');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarClose = document.getElementById('sidebarClose');
+    const logoutButton = document.getElementById('logoutButton');
+    const menuItems = document.querySelectorAll('.menu-item');
+    const welcomeSection = document.getElementById('welcomeSection');
+    const userName = document.getElementById('userName');
+    const statusMessage = document.getElementById('statusMessage');
+    const proverb = document.getElementById('proverb');
+
+    // State
+    let authToken = localStorage.getItem('authToken');
+    let currentSection = 'welcome';
+
+    // Initialize
+    function init() {
+      if (!authToken) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      loadDashboard();
+      setupEventListeners();
+      setRandomProverb();
+    }
+
+    function setupEventListeners() {
+      hamburger.addEventListener('click', toggleSidebar);
+      sidebarClose.addEventListener('click', closeSidebar);
+      logoutButton.addEventListener('click', logout);
+
+      menuItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+          const section = item.getAttribute('data-section');
+          navigateToSection(section);
+          closeSidebar();
+        });
+      });
+    }
+
+    function toggleSidebar() {
+      sidebar.classList.toggle('open');
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+    }
+
+    function setRandomProverb() {
+      proverb.textContent = `"${proverbs[Math.floor(Math.random() * proverbs.length)]}"`;
+    }
+
+    function navigateToSection(section) {
+      // Update menu highlighting
+      menuItems.forEach(item => {
+        const itemSection = item.getAttribute('data-section');
+        if (itemSection === section) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+
+      // Hide welcome section
+      welcomeSection.style.display = section === 'welcome' ? 'block' : 'none';
+
+      // Hide all iframes
+      document.querySelectorAll('.feature-iframe').forEach(frame => {
+        frame.classList.remove('active');
+      });
+
+      currentSection = section;
+
+      if (section !== 'welcome') {
+        const frameId = frameIdMap[section] || (section + 'Frame');
+        const frame = document.getElementById(frameId);
+        
+        if (frame) {
+          frame.classList.add('active');
+          
+          // Load the feature page if not already loaded
+          const featurePage = featureMap[section];
+          if (featurePage && !frame.src) {
+            const tokenParam = authToken ? `?token=${encodeURIComponent(authToken)}` : '';
+            frame.src = featurePage + tokenParam;
+          }
+        }
+      }
+
+      // Scroll to top
+      const contentArea = document.querySelector('.content-area');
+      if (contentArea) {
+        contentArea.scrollTop = 0;
+      }
+    }
+
+    async function loadDashboard() {
+      try {
+        const response = await fetch('http://localhost:8001/me', {
+          headers: { Authorization: `Bearer ${authToken}` }
+        });
+
+        if (!response.ok) throw new Error('Session expired');
+
+        const data = await response.json();
+        const firstName = data.full_name ? data.full_name.split(' ')[0] : 'Student';
+        userName.textContent = `Welcome, ${firstName}`;
+        statusMessage.textContent = 'You are signed in and authenticated successfully.';
+        statusMessage.classList.remove('error');
+      } catch (error) {
+        statusMessage.textContent = 'Authentication failed. Please log in again.';
+        statusMessage.classList.add('error');
+        localStorage.removeItem('authToken');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1200);
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('currentUser');
+      window.location.href = 'index.html';
+    }
+
+    // Initialize on load
+    init();
+  </script>
+</body>
+</html>

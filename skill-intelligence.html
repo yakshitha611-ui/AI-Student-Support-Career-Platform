@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skill Intelligence | AI-Powered Student Support</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --primary: #1d4ed8;
+      --primary-soft: #dbeafe;
+      --success: #166534;
+      --warning: #b45309;
+      --danger: #b91c1c;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #dfe7f4;
+      --shadow: 0 12px 25px rgba(15, 23, 42, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .topbar {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .brand { font-size: 1.1rem; font-weight: 700; }
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .button {
+      border: none;
+      border-radius: 10px;
+      padding: 0.8rem 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+    .button:hover { opacity: 0.92; }
+    .button.primary { background: var(--primary); color: white; }
+    .button.secondary { background: #eef2ff; color: var(--primary); }
+    .button.ghost { background: #f8fafc; color: var(--text); border: 1px solid var(--border); }
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem 3rem;
+    }
+    .stack {
+      display: grid;
+      gap: 1.5rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 1.4rem;
+    }
+    .card h3 {
+      margin: 0 0 0.9rem;
+      font-size: 1.15rem;
+      color: var(--primary);
+    }
+    .card h4 {
+      margin: 0 0 0.4rem;
+      font-size: 1rem;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+    .stat-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+    .stat-box .label {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-bottom: 0.4rem;
+    }
+    .stat-box .value {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+    .pill strong { font-weight: 800; }
+    .progress {
+      height: 12px;
+      background: #eef2ff;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 0.6rem;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), #7c3aed);
+      border-radius: inherit;
+    }
+    .skills-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 0.8rem;
+    }
+    .skill-chip {
+      border-radius: 999px;
+      padding: 0.5rem 0.85rem;
+      font-size: 0.82rem;
+      background: #edf6ff;
+      color: var(--text);
+      border: 1px solid #d7ebff;
+    }
+    .skill-chip.missing {
+      background: #fff1f2;
+      color: #9f1239;
+      border-color: #fecdd3;
+    }
+    .skill-chip.developing {
+      background: #fff7ed;
+      color: #9a5c00;
+      border-color: #fed7aa;
+    }
+    .skill-chip.strong {
+      background: #ecfdf5;
+      color: #166534;
+      border-color: #bbf7d0;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .empty-state {
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      color: var(--muted);
+      background: #f8fafc;
+    }
+    .alert {
+      display: none;
+      padding: 0.8rem 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .alert.success { display: block; background: #ecfdf5; color: #166534; }
+    .alert.error { display: block; background: #fef2f2; color: #991b1b; }
+    .form-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-block: 1rem;
+    }
+    select, input {
+      width: 100%;
+      padding: 0.8rem 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    .form-control {
+      min-width: 220px;
+      flex: 1;
+    }
+    .quiz-box {
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 1rem;
+    }
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.8rem;
+      flex-wrap: wrap;
+    }
+    .option-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.6rem;
+    }
+    .option-list label {
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 0.8rem;
+      background: white;
+      cursor: pointer;
+    }
+    .option-list input { width: auto; margin-right: 8px; }
+    .recommendation-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.9rem;
+      background: #f9fafb;
+      margin-bottom: 0.75rem;
+    }
+    .recommendation-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.4rem;
+    }
+    .priority-high { color: #b91c1c; }
+    .priority-medium { color: #b45309; }
+    .priority-low { color: #166534; }
+    @media (max-width: 768px) {
+      .topbar { padding: 0.9rem 1rem; }
+      .container { padding-inline: 0.7rem; }
+      .button { width: 100%; }
+      .top-actions { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">AI-Powered Student Support</div>
+    <div class="top-actions">
+      <button class="button secondary" type="button" onclick="goTo('student-profile.html')">Student Profile</button>
+      <button class="button ghost" type="button" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="alertBox" class="alert"></div>
+
+    <div class="stack">
+      <section class="card">
+        <h3>🧠 Skill Gap Analysis</h3>
+        <div id="skillGapContent"></div>
+      </section>
+
+      <section class="card">
+        <h3>📝 Skill Assessment</h3>
+        <div class="form-row">
+          <select id="assessmentSkill" class="form-control"></select>
+          <button class="button primary" type="button" id="startAssessmentBtn">Start Assessment</button>
+        </div>
+        <div id="quizContainer"></div>
+      </section>
+
+      <section class="card">
+        <h3>📊 Skill Dashboard</h3>
+        <div id="dashboardContent"></div>
+      </section>
+
+      <section class="card">
+        <h3>🎯 Personalized Skill Recommendations</h3>
+        <div id="recommendationContent"></div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // Get auth token from localStorage, sessionStorage, or URL parameter (for iframe usage)
+    let authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+    
+    if (!authToken) {
+      const urlParams = new URLSearchParams(window.location.search);
+      authToken = urlParams.get('token');
+    }
+    
+    if (!authToken) {
+      window.location.href = 'index.html';
+    }
+
+    const state = {
+      skills: [],
+      skillGap: null,
+      assessmentSkill: '',
+      assessmentQuestions: [],
+      currentQuestionIndex: 0,
+      answers: [],
+      assessmentResult: null,
+      recommendations: [],
+      dashboard: null,
+    };
+
+    function goTo(page) {
+      window.location.href = page;
+    }
+
+    function setAlert(message, type = 'success') {
+      const box = document.getElementById('alertBox');
+      box.textContent = message;
+      box.className = `alert ${type}`;
+    }
+
+    function logout() {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('currentUser');
+      window.location.href = 'index.html';
+    }
+
+    async function apiFetch(url, options = {}) {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+      const text = await response.text();
+      let data = null;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch { data = text; }
+      if (!response.ok) {
+        const detail = data && data.detail ? data.detail : 'Request failed.';
+        throw new Error(detail);
+      }
+      return data;
+    }
+
+    function renderSkillGap(data) {
+      const container = document.getElementById('skillGapContent');
+      if (!data) {
+        container.innerHTML = '<div class="empty-state">Loading skill analysis...</div>';
+        return;
+      }
+
+      if (!data.has_skills) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <strong>No skills added yet.</strong><br />
+            Add your skills in Student Profile to generate your skill analysis.
+          </div>
+        `;
+        return;
+      }
+
+      if (!data.has_career_goal) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <strong>Set your career goal to generate a personalized skill-gap analysis.</strong>
+          </div>
+        `;
+        return;
+      }
+
+      const strong = (data.strong_skills || []).map(skill => `<span class="skill-chip strong">${skill}</span>`).join('') || '<span class="skill-chip">No strong skills identified yet</span>';
+      const developing = (data.developing_skills || []).map(skill => `<span class="skill-chip developing">${skill}</span>`).join('') || '<span class="skill-chip">No developing skills</span>';
+      const missing = (data.missing_skills || []).map(skill => `<span class="skill-chip missing">${skill}</span>`).join('') || '<span class="skill-chip">No missing skills</span>';
+
+      container.innerHTML = `
+        <div class="meta-grid">
+          <div class="stat-box">
+            <div class="label">Career Target</div>
+            <div class="value" style="font-size:1.1rem;">${data.career_name || 'Career Goal'}</div>
+          </div>
+          <div class="stat-box">
+            <div class="label">Overall Skill Match</div>
+            <div class="value">${data.overall_match || 0}%</div>
+          </div>
+        </div>
+        <div class="progress" style="margin-top:1rem;">
+          <div class="progress-bar" style="width:${data.overall_match || 0}%"></div>
+        </div>
+        <div style="margin-top:1rem;">
+          <div class="pill"><strong>Strong Skills</strong></div>
+          <div class="skills-list">${strong}</div>
+        </div>
+        <div style="margin-top:1rem;">
+          <div class="pill"><strong>Developing Skills</strong></div>
+          <div class="skills-list">${developing}</div>
+        </div>
+        <div style="margin-top:1rem;">
+          <div class="pill"><strong>Missing Skills</strong></div>
+          <div class="skills-list">${missing}</div>
+        </div>
+      `;
+    }
+
+    function populateAssessmentSkills(skills) {
+      const select = document.getElementById('assessmentSkill');
+      if (!skills || !skills.length) {
+        select.innerHTML = '<option value="">No skills available</option>';
+        return;
+      }
+      select.innerHTML = skills.map(skill => `<option value="${skill}">${skill}</option>`).join('');
+      state.assessmentSkill = skills[0];
+      select.value = state.assessmentSkill;
+    }
+
+    async function loadAssessmentSkills() {
+      try {
+        const data = await apiFetch('http://localhost:8001/api/student/assessment/skills');
+        const skills = data.skills || [];
+        populateAssessmentSkills(skills);
+      } catch (error) {
+        console.error(error);
+        const select = document.getElementById('assessmentSkill');
+        select.innerHTML = '<option value="">No skills available</option>';
+      }
+    }
+
+    function renderQuizQuestions() {
+      const container = document.getElementById('quizContainer');
+      if (!state.assessmentQuestions.length) {
+        container.innerHTML = '<div class="empty-state">Select a skill and start an assessment.</div>';
+        return;
+      }
+
+      const question = state.assessmentQuestions[state.currentQuestionIndex];
+      if (!question) {
+        container.innerHTML = '<div class="empty-state">No questions available for this skill.</div>';
+        return;
+      }
+
+      const selected = (state.answers.find(item => item.question_id === question.id) || {}).selected_option || '';
+      const total = state.assessmentQuestions.length;
+      const progressText = `Question ${state.currentQuestionIndex + 1} of ${total}`;
+
+      container.innerHTML = `
+        <div class="quiz-box">
+          <div class="quiz-header">
+            <strong>${question.skill} Assessment</strong>
+            <span class="pill">${progressText}</span>
+          </div>
+          <h4>${question.question}</h4>
+          <ul class="option-list">
+            ${question.options.map(option => `
+              <li>
+                <label>
+                  <input type="radio" name="questionOption" value="${option}" ${selected === option ? 'checked' : ''} />
+                  ${option}
+                </label>
+              </li>
+            `).join('')}
+          </ul>
+          <div class="form-row" style="margin-top:1rem; justify-content:flex-end;">
+            <button class="button ghost" type="button" id="prevQuestionBtn" ${state.currentQuestionIndex === 0 ? 'disabled' : ''}>Previous</button>
+            ${state.currentQuestionIndex < total - 1
+              ? '<button class="button primary" type="button" id="nextQuestionBtn">Next</button>'
+              : '<button class="button primary" type="button" id="submitAssessmentBtn">Submit Quiz</button>'}
+          </div>
+        </div>
+      `;
+
+      document.getElementById('nextQuestionBtn')?.addEventListener('click', handleNextQuestion);
+      document.getElementById('prevQuestionBtn')?.addEventListener('click', handlePreviousQuestion);
+      document.getElementById('submitAssessmentBtn')?.addEventListener('click', submitAssessment);
+
+      document.querySelectorAll('input[name="questionOption"]').forEach(input => {
+        input.addEventListener('change', (event) => {
+          const selectedOption = event.target.value;
+          const existingIndex = state.answers.findIndex(answer => answer.question_id === question.id);
+          if (existingIndex >= 0) {
+            state.answers[existingIndex].selected_option = selectedOption;
+          } else {
+            state.answers.push({ question_id: question.id, selected_option: selectedOption });
+          }
+        });
+      });
+    }
+
+    async function startAssessment() {
+      const skillName = document.getElementById('assessmentSkill').value;
+      if (!skillName) {
+        setAlert('Select a skill first.', 'error');
+        return;
+      }
+
+      try {
+        const data = await apiFetch(`http://localhost:8001/api/student/assessment/questions?skill_name=${encodeURIComponent(skillName)}`);
+        state.assessmentQuestions = data.questions || [];
+        state.currentQuestionIndex = 0;
+        state.answers = [];
+        state.assessmentResult = null;
+        renderQuizQuestions();
+      } catch (error) {
+        setAlert(error.message || 'Unable to load assessment questions.', 'error');
+      }
+    }
+
+    function handleNextQuestion() {
+      if (state.currentQuestionIndex < state.assessmentQuestions.length - 1) {
+        state.currentQuestionIndex += 1;
+        renderQuizQuestions();
+      }
+    }
+
+    function handlePreviousQuestion() {
+      if (state.currentQuestionIndex > 0) {
+        state.currentQuestionIndex -= 1;
+        renderQuizQuestions();
+      }
+    }
+
+    async function submitAssessment() {
+      const skillName = document.getElementById('assessmentSkill').value;
+      const fullAnswers = state.answers;
+      if (!fullAnswers.length) {
+        setAlert('Please answer at least one question before submitting.', 'error');
+        return;
+      }
+
+      try {
+        const result = await apiFetch('http://localhost:8001/api/student/assessment/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ skill_name: skillName, answers: fullAnswers }),
+        });
+        state.assessmentResult = result;
+        setAlert('Assessment submitted successfully.', 'success');
+        await loadDashboardData();
+        renderAssessmentResult();
+      } catch (error) {
+        setAlert(error.message || 'Assessment could not be submitted.', 'error');
+      }
+    }
+
+    function renderAssessmentResult() {
+      const container = document.getElementById('quizContainer');
+      const result = state.assessmentResult;
+      if (!result) {
+        return;
+      }
+      container.innerHTML = `
+        <div class="quiz-box">
+          <h4>${result.skill_name} Assessment</h4>
+          <div class="meta-grid">
+            <div class="stat-box">
+              <div class="label">Score</div>
+              <div class="value" style="font-size:1.3rem;">${result.score} / ${result.total_questions}</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Percentage</div>
+              <div class="value" style="font-size:1.3rem;">${result.percentage}%</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Level</div>
+              <div class="value" style="font-size:1.3rem;">${result.level}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDashboard(data) {
+      const container = document.getElementById('dashboardContent');
+      if (!data) {
+        container.innerHTML = '<div class="empty-state">No dashboard data available yet.</div>';
+        return;
+      }
+
+      const results = (data.assessment_results || []).map(item => `
+        <div class="recommendation-item">
+          <div class="recommendation-meta">
+            <strong>${item.skill_name}</strong>
+            <span>${item.percentage}% — ${item.level}</span>
+          </div>
+        </div>
+      `).join('') || '<div class="empty-state">No assessment completed yet. Take an assessment to measure your skill level.</div>';
+
+      container.innerHTML = `
+        <div class="meta-grid">
+          <div class="stat-box">
+            <div class="label">Overall Skill Score</div>
+            <div class="value">${data.overall_skill_score || 0}%</div>
+          </div>
+          <div class="stat-box">
+            <div class="label">Strong Skills</div>
+            <div class="value" style="font-size:1rem;">${(data.strong_skills || []).length || 0}</div>
+          </div>
+        </div>
+        <div style="margin-top:1rem;">
+          <h4>Strong Skills</h4>
+          <div class="skills-list">${(data.strong_skills || []).map(skill => `<span class="skill-chip strong">${skill}</span>`).join('') || '<span class="skill-chip">No strong skills</span>'}</div>
+        </div>
+        <div style="margin-top:1rem;">
+          <h4>Developing Skills</h4>
+          <div class="skills-list">${(data.developing_skills || []).map(skill => `<span class="skill-chip developing">${skill}</span>`).join('') || '<span class="skill-chip">No developing skills</span>'}</div>
+        </div>
+        <div style="margin-top:1rem;">
+          <h4>Missing Skills</h4>
+          <div class="skills-list">${(data.missing_skills || []).map(skill => `<span class="skill-chip missing">${skill}</span>`).join('') || '<span class="skill-chip">No missing skills</span>'}</div>
+        </div>
+        <div style="margin-top:1rem;">
+          <h4>Assessment Results</h4>
+          ${results}
+        </div>
+      `;
+    }
+
+    function renderRecommendations(items) {
+      const container = document.getElementById('recommendationContent');
+      if (!items || !items.length) {
+        container.innerHTML = '<div class="empty-state">No recommendations available yet.</div>';
+        return;
+      }
+
+      container.innerHTML = items.map(item => `
+        <div class="recommendation-item">
+          <div class="recommendation-meta">
+            <strong>${item.skill}</strong>
+            <span class="priority-${item.priority.toLowerCase()}">Priority: ${item.priority}</span>
+          </div>
+          <div>${item.why}</div>
+        </div>
+      `).join('');
+    }
+
+    async function loadDashboardData() {
+      try {
+        const [gap, dashboard, recommendations, results] = await Promise.all([
+          apiFetch('http://localhost:8001/api/student/skill-gap'),
+          apiFetch('http://localhost:8001/api/student/skill-dashboard'),
+          apiFetch('http://localhost:8001/api/student/recommendations'),
+          apiFetch('http://localhost:8001/api/student/assessment-results'),
+        ]);
+
+        state.skillGap = gap;
+        state.dashboard = dashboard;
+        state.recommendations = recommendations.recommendations || [];
+        state.assessmentResults = results.results || [];
+        renderSkillGap(gap);
+        renderDashboard(dashboard);
+        renderRecommendations(state.recommendations);
+      } catch (error) {
+        console.error(error);
+        setAlert(error.message || 'Unable to load skill intelligence data.', 'error');
+        renderSkillGap(null);
+        renderDashboard(null);
+        renderRecommendations([]);
+      }
+    }
+
+    document.getElementById('startAssessmentBtn').addEventListener('click', startAssessment);
+    document.getElementById('assessmentSkill').addEventListener('change', function () {
+      state.assessmentSkill = this.value;
+      state.assessmentQuestions = [];
+      state.answers = [];
+      state.assessmentResult = null;
+      renderQuizQuestions();
+    });
+
+    async function initPage() {
+      await loadAssessmentSkills();
+      await loadDashboardData();
+      if (state.assessmentSkill) {
+        renderQuizQuestions();
+      }
+    }
+
+    initPage();
+  </script>
+</body>
+</html>

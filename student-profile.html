@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile & Dashboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background-color: #1a56db; color: #1f2937; padding: 20px; min-height: 100vh; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: #fff; }
+        .logout-btn { background-color: #fff; color: #1a56db; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; }
+        .section-card { background: #fff; border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .section-card h3 { font-size: 1.2rem; color: #1e429f; margin-bottom: 15px; border-bottom: 2px solid #f3f4f6; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: 500; font-size: 0.85rem; color: #374151; margin-bottom: 6px; }
+        .form-control { width: 100%; padding: 10px 14px; background-color: #f3f4f6; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.95rem; }
+        .btn { background-color: #1a56db; color: white; border: none; border-radius: 6px; padding: 10px 20px; font-size: 0.95rem; cursor: pointer; }
+        .btn-secondary { background-color: #6b7280; }
+        .btn-danger { background-color: #e02424; padding: 4px 10px; font-size: 0.8rem; }
+        .tags-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+        .tag { background-color: #e1effe; color: #1e429f; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; }
+        .tag span { cursor: pointer; color: #e02424; font-weight: bold; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 15px; }
+        .item-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; }
+        .alert-box { padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem; display: none; }
+        .success { background-color: #def7ec; color: #03543f; }
+        .error { background-color: #fde8e8; color: #9b1c1c; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.55); justify-content: center; align-items: center; z-index: 50; }
+        .modal.open { display: flex; }
+        .modal-card { background: white; width: min(720px, 92vw); border-radius: 12px; padding: 24px; box-shadow: 0 12px 30px rgba(0,0,0,0.25); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .close-btn { background: transparent; border: none; font-size: 1.5rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-nav">
+            <h1>Student Profile & Dashboard</h1>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+        <div id="alertBox" class="alert-box"></div>
+
+        <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+            <button class="btn" type="button" onclick="window.location.href='skill-intelligence.html'">Open Skill Intelligence</button>
+        </div>
+
+        <div class="section-card">
+            <h3><span>Personal Information</span><button class="btn" id="editProfileBtn" onclick="toggleProfileEdit(true)">Edit Information</button></h3>
+            <form id="profileForm" onsubmit="saveProfile(event)">
+                <div class="form-grid">
+                    <div class="form-group"><label>Full Name</label><input type="text" id="fullName" class="form-control" disabled></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="email" class="form-control" disabled></div>
+                    <div class="form-group"><label>Phone Number</label><input type="text" id="phone" class="form-control" disabled></div>
+                    <div class="form-group"><label>Gender</label><select id="gender" class="form-control" disabled><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option></select></div>
+                    <div class="form-group"><label>College / University</label><input type="text" id="college" class="form-control" disabled></div>
+                    <div class="form-group"><label>Branch / Department</label><input type="text" id="branch" class="form-control" disabled></div>
+                    <div class="form-group"><label>Year of Study</label><input type="text" id="yearOfStudy" class="form-control" disabled></div>
+                    <div class="form-group"><label>Semester</label><input type="text" id="semester" class="form-control" disabled></div>
+                </div>
+                <div id="profileButtons" style="display: none; margin-top: 15px;"><button type="submit" class="btn">Save Information</button> <button type="button" class="btn btn-secondary" onclick="toggleProfileEdit(false)">Cancel</button></div>
+            </form>
+        </div>
+
+        <div class="section-card">
+            <h3>Skills</h3>
+            <div id="skillsTags" class="tags-container"></div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; max-width: 700px; align-items: center;">
+                <input type="text" id="newSkillInput" class="form-control" placeholder="Skill Name (e.g. Python)" style="max-width: 240px;">
+                <select id="newSkillProficiency" class="form-control" style="max-width: 180px;">
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate" selected>Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                </select>
+                <button type="button" id="saveSkillBtn" class="btn" onclick="saveSkill()">Save Skill</button>
+                <button type="button" id="editSelectedSkillBtn" class="btn btn-secondary" onclick="beginEditSkill()" style="display:none;">Edit Skill</button>
+                <button type="button" id="cancelSkillEditBtn" class="btn btn-secondary" onclick="resetSkillFormMode()" style="display:none;">Cancel</button>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h3><span>Projects</span><button class="btn" onclick="openProjectModal()">+ Add Project</button></h3>
+            <div id="projectsGrid" class="card-grid"></div>
+        </div>
+
+        <div id="projectModal" class="modal" aria-modal="true" role="dialog">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3>Add Project</h3>
+                    <button class="close-btn" type="button" onclick="closeProjectModal()">&times;</button>
+                </div>
+                <form id="projectForm" onsubmit="saveProject(event)">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Project Name</label><input type="text" id="projectName" class="form-control" required></div>
+                        <div class="form-group"><label>Student Role</label><input type="text" id="studentRole" class="form-control"></div>
+                        <div class="form-group"><label>Project Duration</label><input type="text" id="projectDuration" class="form-control"></div>
+                        <div class="form-group"><label>Project Link</label><input type="url" id="projectLink" class="form-control"></div>
+                        <div class="form-group" style="grid-column: 1 / -1;"><label>Technologies Used</label><input type="text" id="technologiesUsed" class="form-control"></div>
+                        <div class="form-group" style="grid-column: 1 / -1;"><label>Skills Used</label><input type="text" id="skillsUsed" class="form-control"></div>
+                        <div class="form-group" style="grid-column: 1 / -1;"><label>Description</label><textarea id="projectDescription" class="form-control" rows="4"></textarea></div>
+                    </div>
+                    <div style="margin-top: 18px; display: flex; gap: 10px; justify-content: flex-end;">
+                        <button type="button" class="btn btn-secondary" onclick="closeProjectModal()">Cancel</button>
+                        <button type="submit" class="btn">Save Project</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h3><span>Certifications</span><button class="btn" onclick="openCertModal()">+ Add Certification</button></h3>
+            <div id="certsGrid" class="card-grid"></div>
+        </div>
+
+        <div class="section-card">
+            <h3><span>Career Goal</span><button class="btn" id="editCareerBtn" type="button" onclick="toggleCareerGoalEdit(true)">Edit Career Goal</button></h3>
+            <form id="careerForm" onsubmit="saveCareerGoal(event)">
+                <div class="form-grid">
+                    <div class="form-group"><label>Target Career</label><input type="text" id="targetCareer" class="form-control" disabled></div>
+                    <div class="form-group"><label>Preferred Job Role</label><input type="text" id="preferredRole" class="form-control" disabled></div>
+                    <div class="form-group"><label>Preferred Industry</label><input type="text" id="preferredIndustry" class="form-control" disabled></div>
+                    <div class="form-group"><label>Career Interests</label><input type="text" id="careerInterests" class="form-control" disabled></div>
+                    <div class="form-group"><label>Short-Term Goal</label><input type="text" id="shortTermGoal" class="form-control" disabled></div>
+                    <div class="form-group"><label>Long-Term Goal</label><input type="text" id="longTermGoal" class="form-control" disabled></div>
+                </div>
+                <div id="careerButtons" style="display: none; margin-top: 15px;">
+                    <button type="submit" class="btn">Save Career Preferences</button>
+                    <button type="button" class="btn btn-secondary" onclick="toggleCareerGoalEdit(false)">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="section-card">
+            <h3>Internship Opportunities</h3>
+            <div style="font-weight: 600; color: #03543f; margin-bottom: 8px;">Category 1: Ready to Apply</div>
+            <div id="readyInternships" class="card-grid" style="margin-bottom: 20px;"></div>
+            <div style="font-weight: 600; color: #9f580a; margin-bottom: 8px;">Category 2: Potential Opportunities (Upskilling required)</div>
+            <div id="upskillInternships" class="card-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        function getStoredAuthToken() {
+            // First check localStorage and sessionStorage
+            const candidates = [
+                localStorage.getItem("authToken"),
+                localStorage.getItem("access_token"),
+                sessionStorage.getItem("authToken"),
+                sessionStorage.getItem("access_token")
+            ];
+
+            let token = candidates.find((token) => typeof token === "string" && token.trim().length > 0);
+            
+            // If not found, check URL parameters (for iframe usage in dashboard)
+            if (!token) {
+                const urlParams = new URLSearchParams(window.location.search);
+                token = urlParams.get("token");
+            }
+            
+            return token && typeof token === "string" ? token : "";
+        }
+
+        function clearAuthSession() {
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("access_token");
+            sessionStorage.removeItem("authToken");
+            sessionStorage.removeItem("access_token");
+            localStorage.removeItem("currentUser");
+        }
+
+        function redirectToLogin() {
+            clearAuthSession();
+            window.location.href = "index.html";
+        }
+
+        const authToken = getStoredAuthToken();
+        if (!authToken) {
+            redirectToLogin();
+        }
+
+        let isEditingProfile = false;
+        let isEditingCareerGoal = false;
+
+        async function fetchWithAuth(url, options = {}) {
+            const headers = {
+                ...(options.headers || {}),
+                Authorization: `Bearer ${authToken}`
+            };
+
+            const response = await fetch(url, { ...options, headers });
+            if (response.status === 401 || response.status === 403) {
+                redirectToLogin();
+                throw new Error("Invalid authentication credentials.");
+            }
+            return response;
+        }
+
+        function syncProfileEditState() {
+            const profileFields = document.querySelectorAll("#profileForm input, #profileForm select");
+            profileFields.forEach((field) => {
+                field.disabled = !isEditingProfile;
+            });
+            document.getElementById("profileButtons").style.display = isEditingProfile ? "block" : "none";
+            document.getElementById("editProfileBtn").style.display = isEditingProfile ? "none" : "block";
+        }
+
+        function syncCareerGoalEditState() {
+            const careerFields = document.querySelectorAll("#careerForm input");
+            careerFields.forEach((field) => {
+                field.disabled = !isEditingCareerGoal;
+            });
+            document.getElementById("careerButtons").style.display = isEditingCareerGoal ? "block" : "none";
+            document.getElementById("editCareerBtn").style.display = isEditingCareerGoal ? "none" : "block";
+        }
+
+        async function fetchDashboardData() {
+            try {
+                const res = await fetchWithAuth("http://localhost:8001/profile");
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById("fullName").value = data.full_name || "";
+                    document.getElementById("email").value = data.email || "";
+                    document.getElementById("phone").value = data.phone_number || "";
+                    document.getElementById("gender").value = data.gender || "";
+                    document.getElementById("college").value = data.university || "";
+                    document.getElementById("branch").value = data.branch || "";
+                    document.getElementById("yearOfStudy").value = data.year_of_study || "";
+                    document.getElementById("semester").value = data.current_semester || "";
+
+                    const cgpaInput = document.getElementById("cgpa");
+                    if (cgpaInput) cgpaInput.value = data.cgpa_percentage || "";
+
+                    renderSkills(data.skills || []);
+                    renderProjects(data.projects || []);
+                    renderCertifications(data.certifications || []);
+                    if (data.career_goal) {
+                        document.getElementById("targetCareer").value = data.career_goal.target_career || "";
+                        document.getElementById("preferredRole").value = data.career_goal.preferred_role || "";
+                        document.getElementById("preferredIndustry").value = data.career_goal.preferred_industry || "";
+                        document.getElementById("careerInterests").value = data.career_goal.career_interests || "";
+                        document.getElementById("shortTermGoal").value = data.career_goal.short_term_goal || "";
+                        document.getElementById("longTermGoal").value = data.career_goal.long_term_goal || "";
+                    }
+                    renderInternships(data.skills || []);
+                }
+            } catch (err) {
+                console.error("Profile fetch failed:", err);
+                if (err.message && err.message.includes("Invalid authentication credentials")) {
+                    showAlert("Your session expired. Please log in again.", "error");
+                }
+            }
+        }
+
+        function toggleProfileEdit(enable) {
+            isEditingProfile = Boolean(enable);
+            syncProfileEditState();
+        }
+
+        function toggleCareerGoalEdit(enable) {
+            isEditingCareerGoal = Boolean(enable);
+            syncCareerGoalEditState();
+        }
+
+        async function saveProfile(event) {
+            if (event) event.preventDefault();
+
+            const fullName = document.getElementById("fullName").value.trim();
+            const emailField = document.getElementById("email");
+            const email = emailField.value.trim();
+            const payload = {
+                full_name: fullName,
+                email: email,
+                phone_number: document.getElementById("phone").value.trim(),
+                gender: document.getElementById("gender").value,
+                university: document.getElementById("college").value.trim(),
+                branch: document.getElementById("branch").value.trim(),
+                year_of_study: document.getElementById("yearOfStudy").value.trim(),
+                current_semester: document.getElementById("semester").value.trim()
+            };
+
+            const cgpaField = document.getElementById("cgpa");
+            if (cgpaField) payload.cgpa_percentage = cgpaField.value.trim();
+
+            if (!fullName) {
+                showAlert("Full Name cannot be empty.", "error");
+                return;
+            }
+
+            emailField.setCustomValidity("");
+            if (!email || !emailField.checkValidity()) {
+                emailField.setCustomValidity("Please enter a valid email address.");
+                emailField.reportValidity();
+                showAlert("Please enter a valid email address.", "error");
+                return;
+            }
+
+            const res = await fetchWithAuth("http://localhost:8001/profile", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}") || {};
+                currentUser.full_name = fullName;
+                currentUser.email = email;
+                localStorage.setItem("currentUser", JSON.stringify(currentUser));
+                showAlert("Profile saved successfully.", "success");
+                toggleProfileEdit(false);
+                await fetchDashboardData();
+                return;
+            }
+
+            let errorMessage = "Unable to save profile.";
+            try {
+                const errorData = await res.json();
+                errorMessage = errorData.detail || errorData.message || errorMessage;
+            } catch (err) {}
+            showAlert(errorMessage, "error");
+        }
+
+        let currentSkills = [];
+        let selectedSkillId = null;
+
+        function resetSkillFormMode() {
+            selectedSkillId = null;
+            document.getElementById("newSkillInput").value = "";
+            document.getElementById("newSkillProficiency").value = "Intermediate";
+            document.getElementById("saveSkillBtn").textContent = "Save Skill";
+            document.getElementById("saveSkillBtn").removeAttribute("data-skill-id");
+            document.getElementById("saveSkillBtn").removeAttribute("data-mode");
+            document.getElementById("editSelectedSkillBtn").style.display = "none";
+            document.getElementById("cancelSkillEditBtn").style.display = "none";
+            renderSkills(currentSkills);
+        }
+
+        function selectSkill(skillId) {
+            selectedSkillId = Number(skillId);
+            const skill = currentSkills.find(item => Number(item.id) === Number(selectedSkillId));
+            document.getElementById("editSelectedSkillBtn").style.display = skill ? "inline-block" : "none";
+            document.getElementById("cancelSkillEditBtn").style.display = skill ? "inline-block" : "none";
+            renderSkills(currentSkills);
+        }
+
+        function beginEditSkill() {
+            if (!selectedSkillId) {
+                showAlert("Select a skill to edit.", "error");
+                return;
+            }
+
+            const selectedSkill = currentSkills.find(item => Number(item.id) === Number(selectedSkillId));
+            if (!selectedSkill) {
+                showAlert("Selected skill not found.", "error");
+                return;
+            }
+
+            document.getElementById("newSkillInput").value = selectedSkill.skill_name || "";
+            document.getElementById("newSkillProficiency").value = selectedSkill.proficiency || "Intermediate";
+            document.getElementById("saveSkillBtn").textContent = "Save Changes";
+            document.getElementById("saveSkillBtn").setAttribute("data-mode", "edit");
+            document.getElementById("saveSkillBtn").setAttribute("data-skill-id", String(selectedSkillId));
+            document.getElementById("cancelSkillEditBtn").style.display = "inline-block";
+        }
+
+        async function saveSkill() {
+            const skill_name = document.getElementById("newSkillInput").value.trim();
+            const proficiency = document.getElementById("newSkillProficiency").value;
+            const mode = document.getElementById("saveSkillBtn").getAttribute("data-mode");
+            const skillId = Number(document.getElementById("saveSkillBtn").getAttribute("data-skill-id") || "0");
+
+            if (!skill_name) {
+                showAlert("Skill name is required.", "error");
+                return;
+            }
+
+            try {
+                const endpoint = mode === "edit" && skillId ? `http://localhost:8001/api/profile/skills/${skillId}` : "http://localhost:8001/api/profile/skills";
+                const method = mode === "edit" && skillId ? "PUT" : "POST";
+
+                const res = await fetchWithAuth(endpoint, {
+                    method,
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ skill_name, proficiency })
+                });
+
+                const responseData = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    throw new Error(responseData.detail || responseData.message || "Unable to save skill.");
+                }
+
+                resetSkillFormMode();
+                showAlert(mode === "edit" ? "Skill updated successfully." : "Skill saved successfully.", "success");
+                fetchDashboardData();
+            } catch (error) {
+                showAlert(error.message || "Unable to save skill.", "error");
+            }
+        }
+
+        async function deleteSkill(id) {
+            const res = await fetchWithAuth(`http://localhost:8001/api/student/skills/${id}`, { method: "DELETE" });
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                showAlert(errorData.detail || "Unable to delete skill.", "error");
+                return;
+            }
+            showAlert("Skill deleted successfully.", "success");
+            fetchDashboardData();
+        }
+
+        function renderSkills(skills) {
+            currentSkills = Array.isArray(skills) ? skills : [];
+            const selectedSkill = currentSkills.find(item => Number(item.id) === Number(selectedSkillId));
+
+            document.getElementById("skillsTags").innerHTML = currentSkills.length
+                ? currentSkills.map(s => {
+                    const isSelected = Number(s.id) === Number(selectedSkillId);
+                    return `<div class="tag ${isSelected ? 'selected-skill' : ''}" data-skill-id="${s.id}" onclick="selectSkill(${s.id})" style="cursor:pointer; ${isSelected ? 'outline: 2px solid #1a56db; background: #dbeafe;' : ''}">${s.skill_name}${s.proficiency ? ` (${s.proficiency})` : ''} <span onclick="event.stopPropagation(); deleteSkill(${s.id});">&times;</span></div>`;
+                }).join('')
+                : '<p style="color:#6b7280; font-size:0.9rem;">No skills added yet.</p>';
+
+            document.getElementById("editSelectedSkillBtn").style.display = selectedSkill ? "inline-block" : "none";
+            document.getElementById("cancelSkillEditBtn").style.display = selectedSkill ? "inline-block" : "none";
+        }
+
+        function openProjectModal() {
+            document.getElementById("projectModal").classList.add("open");
+        }
+
+        function closeProjectModal() {
+            document.getElementById("projectModal").classList.remove("open");
+            document.getElementById("projectForm").reset();
+        }
+
+        async function saveProject(event) {
+            event.preventDefault();
+            const payload = {
+                project_name: document.getElementById("projectName").value.trim(),
+                description: document.getElementById("projectDescription").value.trim(),
+                technologies_used: document.getElementById("technologiesUsed").value.trim(),
+                skills_used: document.getElementById("skillsUsed").value.trim(),
+                student_role: document.getElementById("studentRole").value.trim(),
+                project_duration: document.getElementById("projectDuration").value.trim(),
+                project_link: document.getElementById("projectLink").value.trim()
+            };
+            if (!payload.project_name) {
+                showAlert("Project name is required.", "error");
+                return;
+            }
+
+            const res = await fetchWithAuth("http://localhost:8001/api/student/projects", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                showAlert(errorData.detail || "Unable to save project.", "error");
+                return;
+            }
+
+            closeProjectModal();
+            showAlert("Project saved successfully.", "success");
+            fetchDashboardData();
+        }
+
+        async function deleteProject(id) {
+            const res = await fetchWithAuth(`http://localhost:8001/api/student/projects/${id}`, { method: "DELETE" });
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                showAlert(errorData.detail || "Unable to delete project.", "error");
+                return;
+            }
+            showAlert("Project deleted successfully.", "success");
+            fetchDashboardData();
+        }
+
+        function renderProjects(projects) {
+            document.getElementById("projectsGrid").innerHTML = projects.length ? projects.map(p => `<div class="item-card"><h4>${p.project_name || p.name || 'Project'}</h4><p>${p.description || ''}</p><p><strong>Role:</strong> ${p.student_role || 'N/A'}</p><p><strong>Skills:</strong> ${p.skills_used || 'N/A'}</p><p><strong>Duration:</strong> ${p.project_duration || 'N/A'}</p><button class="btn btn-danger" style="margin-top:8px;" onclick="deleteProject(${p.id})">Delete</button></div>`).join('') : '<p style="color:#6b7280; font-size:0.9rem;">No projects added yet.</p>';
+        }
+
+        async function openCertModal() {
+            const cert_name = prompt("Certificate Name:");
+            if (!cert_name) return;
+            const issuing_organization = prompt("Issuing Organization:");
+            await fetchWithAuth("http://localhost:8001/api/student/certifications", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ cert_name, issuing_organization })
+            });
+            fetchDashboardData();
+        }
+
+        async function deleteCert(id) {
+            await fetchWithAuth(`http://localhost:8001/api/student/certifications/${id}`, { method: "DELETE" });
+            fetchDashboardData();
+        }
+
+        function renderCertifications(certs) {
+            document.getElementById("certsGrid").innerHTML = certs.length ? certs.map(c => `<div class="item-card"><h4>${c.cert_name}</h4><p>${c.issuing_organization}</p><button class="btn btn-danger" style="margin-top:8px;" onclick="deleteCert(${c.id})">Delete</button></div>`).join('') : '<p style="color:#6b7280; font-size:0.9rem;">No certifications added yet.</p>';
+        }
+
+        async function saveCareerGoal(e) {
+            e.preventDefault();
+            const payload = {
+                target_career: document.getElementById("targetCareer").value,
+                preferred_role: document.getElementById("preferredRole").value,
+                preferred_industry: document.getElementById("preferredIndustry").value,
+                career_interests: document.getElementById("careerInterests").value,
+                short_term_goal: document.getElementById("shortTermGoal").value,
+                long_term_goal: document.getElementById("longTermGoal").value
+            };
+            const res = await fetchWithAuth("http://localhost:8001/api/student/career-goal", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                showAlert(errorData.detail || "Unable to save career goal.", "error");
+                return;
+            }
+            showAlert("Career preferences saved!", "success");
+            toggleCareerGoalEdit(false);
+            await fetchDashboardData();
+        }
+
+        function renderInternships(skills) {
+            const internshipCatalog = [
+                {
+                    title: "Python Developer Intern",
+                    company: "TechCorp",
+                    role: "Backend Developer",
+                    requiredSkills: ["Python", "SQL", "Git", "FastAPI"],
+                    duration: "3 months",
+                    workMode: "Hybrid",
+                    eligibility: "Open to learners with Python and DB basics.",
+                    recommendedTopics: ["FastAPI", "REST API Development", "SQL Queries"]
+                },
+                {
+                    title: "Backend Developer Intern",
+                    company: "NovaStack",
+                    role: "API Developer",
+                    requiredSkills: ["Python", "REST API", "Git", "FastAPI"],
+                    duration: "4 months",
+                    workMode: "Remote",
+                    eligibility: "Good understanding of backend fundamentals.",
+                    recommendedTopics: ["FastAPI", "REST API Development", "Git & GitHub"]
+                },
+                {
+                    title: "Data Analyst Intern",
+                    company: "Insight Labs",
+                    role: "Analytics Intern",
+                    requiredSkills: ["SQL", "Python", "Excel"],
+                    duration: "2 months",
+                    workMode: "Onsite",
+                    eligibility: "Comfortable with datasets and reporting.",
+                    recommendedTopics: ["SQL", "Data Cleaning", "Excel Analytics"]
+                }
+            ];
+
+            const normalizeSkill = (value) => String(value || '').trim().toLowerCase();
+            const titleCase = (value) => String(value || '').split(/\s+/).filter(Boolean).map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()).join(' ');
+            const userSkillSet = new Set((skills || []).map(skill => normalizeSkill(skill.skill_name || skill.name || '')).filter(Boolean));
+
+            const scoredInternships = internshipCatalog
+                .map((internship) => {
+                    const requiredSkills = (internship.requiredSkills || []).map(skill => normalizeSkill(skill)).filter(Boolean);
+                    const matchingSkills = requiredSkills.filter(skill => userSkillSet.has(skill));
+                    const missingSkills = requiredSkills.filter(skill => !userSkillSet.has(skill));
+                    const matchPercent = requiredSkills.length ? Math.round((matchingSkills.length / requiredSkills.length) * 100) : 0;
+                    const matchLevel = matchPercent === 100 ? 'Perfect Match' : matchPercent >= 70 ? 'Strong Match' : matchPercent > 0 ? 'Partial Match' : 'No Match';
+                    let whyRecommended = 'This internship aligns with your current skill profile.';
+
+                    if (matchPercent === 100) {
+                        whyRecommended = 'This internship matches your existing skills closely and is a strong fit for your current profile.';
+                    } else if (matchPercent >= 70) {
+                        whyRecommended = 'This internship is a strong match for your current strengths and only needs a little additional preparation.';
+                    } else if (matchPercent > 0) {
+                        whyRecommended = 'This internship builds on your current skills and would benefit from a few focused upskilling steps.';
+                    }
+
+                    return {
+                        ...internship,
+                        requiredSkills,
+                        matchingSkills,
+                        missingSkills,
+                        matchPercent,
+                        matchLevel,
+                        whyRecommended,
+                    };
+                })
+                .filter((internship) => internship.matchingSkills.length > 0)
+                .sort((a, b) => b.matchPercent - a.matchPercent || a.missingSkills.length - b.missingSkills.length);
+
+            const ready = scoredInternships.filter((internship) => internship.matchPercent >= 70);
+            const upskill = scoredInternships.filter((internship) => internship.matchPercent > 0 && internship.matchPercent < 70);
+
+            const buildCard = (internship) => {
+                const matchingDisplay = internship.matchingSkills.length ? internship.matchingSkills.map(titleCase).join(', ') : 'None';
+                const missingDisplay = internship.missingSkills.length ? internship.missingSkills.map(titleCase).join(', ') : 'None';
+                const requiredDisplay = internship.requiredSkills.map(titleCase).join(', ');
+                const isStrongMatch = internship.matchPercent >= 70;
+
+                return `
+                    <div class="item-card">
+                        <h4>${internship.title}</h4>
+                        <p><strong>${internship.company}</strong> · ${internship.role}</p>
+                        <p><strong>Required skills:</strong> ${requiredDisplay}</p>
+                        <p><strong>Student has:</strong> ${matchingDisplay}</p>
+                        <p><strong>Student is missing:</strong> ${missingDisplay}</p>
+                        <p><strong>Match:</strong> ${internship.matchPercent}% (${internship.matchLevel})</p>
+                        <p><strong>Why recommended:</strong> ${internship.whyRecommended}</p>
+                        <p><strong>Work mode:</strong> ${internship.workMode}</p>
+                        <p><strong>Duration:</strong> ${internship.duration}</p>
+                        <p><strong>Eligibility:</strong> ${internship.eligibility}</p>
+                        <p style="color:${isStrongMatch ? '#03543f' : '#9f580a'}; font-weight:600;">Status: ${isStrongMatch ? 'Strong fit for you' : 'Partial fit — keep upskilling'}</p>
+                        ${internship.recommendedTopics && internship.recommendedTopics.length ? `<p><strong>Recommended preparation:</strong> ${internship.recommendedTopics.join(', ')}</p>` : ''}
+                        <button class="btn" style="margin-top: 10px;">Explore</button>
+                    </div>
+                `;
+            };
+
+            document.getElementById("readyInternships").innerHTML = ready.length
+                ? ready.map(buildCard).join('')
+                : '<p style="font-size:0.85rem; color:#6b7280;">No internships currently match your saved skills.</p>';
+
+            document.getElementById("upskillInternships").innerHTML = upskill.length
+                ? upskill.map(buildCard).join('')
+                : '<p style="font-size:0.85rem; color:#6b7280;">No preparation opportunities match your saved skills right now.</p>';
+        }
+
+        function showAlert(msg, type) {
+            const box = document.getElementById("alertBox");
+            box.className = `alert-box ${type}`; box.textContent = msg; box.style.display = "block";
+            setTimeout(() => box.style.display = "none", 4000);
+        }
+
+        function logout() {
+            clearAuthSession();
+            window.location.href = "index.html";
+        }
+
+        fetchDashboardData();
+    </script>
+</body>
+</html>
