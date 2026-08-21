@@ -149,14 +149,24 @@
   <script>
     const API_BASE = 'http://localhost:8001';
 
+    function getStoredAuthToken() {
+      const storedToken = [
+        localStorage.getItem('authToken'),
+        localStorage.getItem('access_token'),
+        sessionStorage.getItem('authToken'),
+        sessionStorage.getItem('access_token'),
+      ].find(token => typeof token === 'string' && token.trim());
+
+      if (storedToken) return storedToken.trim();
+
+      const queryToken = new URLSearchParams(window.location.search).get('token');
+      return queryToken && queryToken.trim() ? queryToken.trim() : null;
+    }
+
     function getAuthHeaders() {
-      let token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-      
-      if (!token) {
-        const urlParams = new URLSearchParams(window.location.search);
-        token = urlParams.get('token');
-      }
-      
+      const token = getStoredAuthToken();
+      if (!token) throw new Error('Authentication is required. Please log in again.');
+
       return {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,

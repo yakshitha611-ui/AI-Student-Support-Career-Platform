@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skill Roadmap | AI-Powered Student Support</title>
+  <style>
+    :root { --bg: #f3f6fb; --card: #fff; --primary: #2563eb; --primary-soft: #eaf3ff; --text: #0f172a; --muted: #475569; --border: #dfe7f4; --shadow: 0 12px 25px rgba(15, 23, 42, 0.08); }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--text); }
+    .topbar { background: #fff; border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .brand { font-weight: 700; font-size: 1.1rem; }
+    .actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .button { border: none; border-radius: 10px; padding: 0.75rem 1rem; font-weight: 700; cursor: pointer; }
+    .button.primary { background: var(--primary); color: #fff; }
+    .button.ghost { background: #f8fafc; color: var(--text); border: 1px solid var(--border); }
+    .container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem 3rem; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); padding: 1.4rem; }
+    .hero { background: linear-gradient(135deg, #e8f4ff, #fff 75%); border-color: #bfdbfe; }
+    .eyebrow { color: var(--primary); font-size: 0.75rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+    h1 { margin: 0.45rem 0; color: #1d4ed8; font-size: clamp(1.8rem, 5vw, 2.6rem); }
+    h2 { margin: 0 0 0.9rem; color: var(--primary); }
+    p { color: var(--muted); line-height: 1.55; }
+    .overview-grid, .practice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.8rem; margin-top: 1.2rem; }
+    .overview-item, .practice-item { padding: 1rem; border: 1px solid #dbeafe; border-radius: 12px; background: #f8fbff; color: var(--muted); line-height: 1.5; }
+    .overview-item strong, .practice-item strong { display: block; margin-bottom: 0.35rem; color: #1e40af; }
+    .roadmap { display: grid; gap: 0.8rem; }
+    .stage { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 1rem; align-items: start; position: relative; }
+    .stage:not(:last-child)::after { content: ''; position: absolute; left: 74px; top: 42px; height: 20px; border-left: 2px solid #93c5fd; }
+    .stage-label { padding-top: 0.8rem; color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 0.8rem; }
+    .stage-body { padding: 0.8rem 1rem; border: 1px solid var(--border); border-radius: 12px; background: #f8fbff; }
+    .topics { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.55rem; }
+    .topic { padding: 0.3rem 0.55rem; border-radius: 999px; background: var(--primary-soft); color: #1e40af; font-size: 0.78rem; }
+    .flow { display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+    .flow-step { padding: 0.65rem 0.8rem; border-radius: 10px; background: #e0efff; border: 1px solid #bfdbfe; color: #1e40af; font-weight: 700; font-size: 0.85rem; }
+    .flow-arrow { color: #60a5fa; font-weight: 800; }
+    .final-goal { border-left: 4px solid var(--primary); background: #eff6ff; color: #1e3a8a; line-height: 1.6; }
+    @media (max-width: 600px) { .topbar { padding: 1rem; } .stage { grid-template-columns: 1fr; gap: 0.35rem; } .stage:not(:last-child)::after { display: none; } .flow-arrow { transform: rotate(90deg); } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">AI-Powered Student Support</div>
+    <div class="actions">
+      <button class="button ghost" id="backButton" type="button">Back to Next Best Skill</button>
+      <button class="button ghost" id="logoutButton" type="button">Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card hero">
+      <div class="eyebrow">Selected skill roadmap</div>
+      <h1 id="skillName">Skill Roadmap</h1>
+      <p id="description"></p>
+      <div id="overview" class="overview-grid"></div>
+    </section>
+
+    <section class="card" style="margin-top: 1rem;">
+      <h2>Learning Roadmap</h2>
+      <p>Follow the progression from beginner foundations to job and interview preparation.</p>
+      <div id="flow" class="flow" aria-label="Learning journey"></div>
+      <div id="stages" class="roadmap" style="margin-top: 1rem;"></div>
+    </section>
+
+    <section class="card" style="margin-top: 1rem;">
+      <h2>Recommended Practice</h2>
+      <div id="practice" class="practice-grid"></div>
+    </section>
+
+    <section id="finalGoal" class="card final-goal" style="margin-top: 1rem;"></section>
+  </main>
+
+  <script>
+    const plans = {
+      Python: {
+        description: 'Build a strong Python foundation for automation, backend services, data work, and AI.',
+        why: 'Python is a high-impact next step for building practical software quickly.',
+        useful: 'APIs, automation, data analysis, scripting, and machine learning',
+        outcome: 'Build real Python applications and explain your design choices in interviews.',
+        stages: [['Beginner', ['Syntax', 'Variables', 'Data types', 'Operators', 'Input/output']], ['Core Concepts', ['Conditions', 'Loops', 'Functions', 'Lists', 'Dictionaries']], ['Intermediate', ['OOP', 'Exceptions', 'File handling', 'Modules', 'Packages']], ['Advanced', ['APIs', 'Databases', 'Async programming', 'Testing', 'Frameworks']], ['Practice', ['Coding exercises', 'Debugging', 'Problem solving', 'Mini scripts']], ['Projects', ['CLI tool', 'REST API', 'Portfolio application']], ['Interview Ready', ['Python patterns', 'Complexity', 'Code review', 'Technical questions']]],
+        practice: ['Coding exercises and debugging drills', 'Build a CLI utility and a REST API', 'Practice Python interview questions']
+      },
+      React: {
+        description: 'Learn the component-based approach used to build interactive modern web interfaces.',
+        why: 'React is a direct next step for creating maintainable frontend products.',
+        useful: 'Web apps, dashboards, design systems, and frontend product development',
+        outcome: 'Build accessible React interfaces with reliable state, routing, and API integration.',
+        stages: [['Beginner', ['JSX', 'Components', 'Props', 'Events', 'Rendering']], ['Core Concepts', ['State', 'Effects', 'Forms', 'Lists', 'Conditional UI']], ['Intermediate', ['Custom hooks', 'Routing', 'Context', 'Async data', 'Error states']], ['Advanced', ['Performance', 'Testing', 'Accessibility', 'Architecture', 'Deployment']], ['Practice', ['UI exercises', 'API screens', 'Refactoring', 'Debugging']], ['Projects', ['Task dashboard', 'Data-driven app', 'Portfolio product']], ['Interview Ready', ['Component design', 'State tradeoffs', 'Testing', 'Frontend questions']]],
+        practice: ['Rebuild a small interface from a design', 'Connect a component to a real API', 'Practice state and component design questions']
+      },
+      SQL: {
+        description: 'Develop the querying and data-modeling skills needed to work confidently with relational data.',
+        why: 'SQL strengthens both backend development and data-driven decision making.',
+        useful: 'Backend systems, analytics, reporting, data engineering, and dashboards',
+        outcome: 'Design sensible schemas and write efficient queries for real datasets.',
+        stages: [['Beginner', ['Tables', 'SELECT', 'Filtering', 'Sorting', 'NULL values']], ['Core Concepts', ['Joins', 'Grouping', 'Aggregates', 'Subqueries', 'Constraints']], ['Intermediate', ['Indexes', 'Views', 'Transactions', 'Normalization', 'Window functions']], ['Advanced', ['Query plans', 'Optimization', 'Security', 'Procedures', 'Scaling']], ['Practice', ['Query drills', 'Data cleanup', 'Report building', 'Debugging']], ['Projects', ['Analytics report', 'Relational schema', 'Data dashboard']], ['Interview Ready', ['Joins', 'Tradeoffs', 'Optimization', 'SQL exercises']]],
+        practice: ['Solve query drills against a sample dataset', 'Design a relational schema', 'Practice joins and optimization questions']
+      }
+    };
+
+    function fallbackPlan(skill) {
+      return { description: `Build practical ${skill} ability through guided fundamentals, deliberate practice, and projects.`, why: `${skill} is a targeted next step from your recommendation list.`, useful: 'Coursework, portfolio projects, collaborative work, and interviews', outcome: `Use ${skill} in a practical project and discuss your approach confidently.`, stages: [['Beginner', ['Terminology', 'Setup', 'Basic concepts', 'Tools']], ['Core Concepts', ['Key concepts', 'Common patterns', 'Inputs and outputs']], ['Intermediate', ['Reusable solutions', 'Error handling', 'Testing', 'Integration']], ['Advanced', ['Performance', 'Security', 'Architecture', 'Production practices']], ['Practice', ['Exercises', 'Debugging', 'Problem solving']], ['Projects', ['Beginner project', 'Intermediate project', 'Final project']], ['Interview Ready', ['Fundamentals review', 'Tradeoffs', 'Portfolio walkthrough', 'Practice questions']]], practice: [`Complete guided ${skill} exercises`, `Build a small ${skill} project`, `Practice ${skill} interview questions`] };
+    }
+
+    function escapeHtml(value) { return String(value).replace(/[&<>\"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[character])); }
+
+    function render() {
+      const skill = new URLSearchParams(window.location.search).get('skill')?.trim() || 'Selected Skill';
+      const plan = plans[skill] || fallbackPlan(skill);
+      document.title = `${skill} Roadmap | AI-Powered Student Support`;
+      document.getElementById('skillName').textContent = `${skill} Skill Roadmap`;
+      document.getElementById('description').textContent = plan.description;
+      document.getElementById('overview').innerHTML = [['Why this skill is recommended', plan.why], ['Where it is useful', plan.useful], ['Expected outcome', plan.outcome]].map(item => `<div class="overview-item"><strong>${item[0]}</strong>${escapeHtml(item[1])}</div>`).join('');
+      document.getElementById('flow').innerHTML = plan.stages.map((stage, index) => `<span class="flow-step">${escapeHtml(stage[0])}</span>${index < plan.stages.length - 1 ? '<span class="flow-arrow" aria-hidden="true">→</span>' : ''}`).join('');
+      document.getElementById('stages').innerHTML = plan.stages.map(stage => `<div class="stage"><div class="stage-label">${escapeHtml(stage[0])}</div><div class="stage-body"><strong>${escapeHtml(stage[0])}</strong><div class="topics">${stage[1].map(topic => `<span class="topic">${escapeHtml(topic)}</span>`).join('')}</div></div></div>`).join('');
+      document.getElementById('practice').innerHTML = plan.practice.map((item, index) => `<div class="practice-item"><strong>${index === 0 ? 'Practice activity' : index === 1 ? 'Project idea' : 'Interview preparation'}</strong>${escapeHtml(item)}</div>`).join('');
+      document.getElementById('finalGoal').innerHTML = `<strong>Final Goal</strong><br>${escapeHtml(plan.outcome)}`;
+    }
+
+    document.getElementById('backButton').addEventListener('click', () => { window.location.href = 'skill-recommendations.html'; });
+    document.getElementById('logoutButton').addEventListener('click', () => { localStorage.removeItem('authToken'); localStorage.removeItem('access_token'); sessionStorage.removeItem('authToken'); sessionStorage.removeItem('access_token'); localStorage.removeItem('currentUser'); window.location.href = 'index.html'; });
+    render();
+  </script>
+</body>
+</html>

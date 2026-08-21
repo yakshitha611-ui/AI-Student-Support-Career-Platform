@@ -103,14 +103,24 @@
   <script>
     const API_BASE = 'http://localhost:8001';
 
+    function getStoredAuthToken() {
+      const storedToken = [
+        localStorage.getItem('authToken'),
+        localStorage.getItem('access_token'),
+        sessionStorage.getItem('authToken'),
+        sessionStorage.getItem('access_token'),
+      ].find(token => typeof token === 'string' && token.trim());
+
+      if (storedToken) return storedToken.trim();
+
+      const queryToken = new URLSearchParams(window.location.search).get('token');
+      return queryToken && queryToken.trim() ? queryToken.trim() : null;
+    }
+
     function getAuthHeaders() {
-      let token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-      
-      if (!token) {
-        const urlParams = new URLSearchParams(window.location.search);
-        token = urlParams.get('token');
-      }
-      
+      const token = getStoredAuthToken();
+      if (!token) throw new Error('Authentication is required. Please log in again.');
+
       return {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
@@ -144,12 +154,20 @@
         }
 
         container.innerHTML = '<div class="recs-list">' + data.recommendations.map(rec => `
-          <div class="rec-item">
+          <div class="rec-item" role="button" tabindex="0" data-skill="${rec.skill}">
             <h4>${rec.skill}</h4>
             <div class="rec-detail"><strong>Priority:</strong> <span class="${getPriorityClass(rec.priority)}">${rec.priority}</span></div>
             <div class="rec-detail">${rec.why}</div>
           </div>
         `).join('') + '</div>';
+
+        container.querySelectorAll('[data-skill]').forEach(item => {
+          const openPlan = () => { window.location.href = `skill-roadmap.html?skill=${encodeURIComponent(item.dataset.skill)}`; };
+          item.addEventListener('click', openPlan);
+          item.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openPlan(); }
+          });
+        });
       } catch (error) {
         document.getElementById('recsContainer').innerHTML = 
           '<div class="empty-state">Complete your skill assessment to get your next recommended skill.</div>';

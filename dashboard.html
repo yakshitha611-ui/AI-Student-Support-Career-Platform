@@ -267,6 +267,104 @@
       border-left: 4px solid #dc2626;
     }
 
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .dashboard-card {
+      background: #fff;
+      border: 1px solid rgba(148, 181, 235, 0.3);
+      border-radius: 18px;
+      padding: 1.25rem;
+      box-shadow: 0 10px 24px rgba(75, 116, 176, 0.1);
+    }
+
+    .dashboard-card h2,
+    .dashboard-card h3 {
+      margin: 0;
+      color: var(--text);
+    }
+
+    .section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-heading h2 { font-size: 1.15rem; }
+    .section-heading p { margin: 0.3rem 0 0; color: var(--text-muted); font-size: 0.88rem; }
+
+    .recommendation-card {
+      background: linear-gradient(135deg, #e8f4ff 0%, #fff 72%);
+      border-color: rgba(37, 99, 235, 0.24);
+    }
+
+    .recommendation-kicker {
+      color: var(--primary-dark);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .recommendation-title { margin: 0.5rem 0; font-size: 1.35rem; }
+    .recommendation-reason { color: var(--text-muted); line-height: 1.55; margin: 0 0 1rem; }
+
+    .dashboard-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      border: 0;
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .dashboard-button:hover,
+    .dashboard-button:focus-visible { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2); outline: none; }
+
+    .progress-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.7rem; }
+    .progress-stat { padding: 0.85rem; border-radius: 12px; background: #f5f9ff; border: 1px solid #e2edfb; }
+    .progress-stat-label { color: var(--text-muted); font-size: 0.76rem; line-height: 1.3; }
+    .progress-stat-value { display: block; margin-top: 0.35rem; font-size: 1.3rem; font-weight: 800; color: var(--primary-dark); }
+
+    .progress-track { height: 8px; margin-top: 0.7rem; overflow: hidden; border-radius: 999px; background: #dcecff; }
+    .progress-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #2684ff, #55b8f5); transition: width 0.35s ease; }
+    .skill-meta { color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; margin: 0.65rem 0 1rem; }
+    .skill-name { font-size: 1.5rem; margin-top: 0.55rem !important; color: var(--primary-dark) !important; }
+
+    .learning-list { display: grid; gap: 0.8rem; }
+    .learning-item { padding: 0.85rem; border: 1px solid #e2edfb; border-radius: 12px; }
+    .learning-item-header { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; }
+    .learning-item-header strong { font-size: 0.94rem; }
+    .learning-item-header span { color: var(--text-muted); font-size: 0.8rem; }
+
+    .empty-dashboard { padding: 1.1rem; border: 1px dashed #bfd4ee; border-radius: 12px; color: var(--text-muted); background: #f8fbff; line-height: 1.5; }
+    .activity-list { display: grid; gap: 0.65rem; margin: 0; padding: 0; list-style: none; }
+    .activity-item { display: flex; gap: 0.7rem; align-items: center; color: var(--text-muted); font-size: 0.88rem; }
+    .activity-dot { width: 8px; height: 8px; flex: 0 0 auto; border-radius: 50%; background: #38a3e7; }
+
+    @media (max-width: 900px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .progress-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 480px) {
+      .progress-grid { grid-template-columns: 1fr 1fr; }
+      .dashboard-card { padding: 1rem; }
+      .recommendation-title { font-size: 1.2rem; }
+    }
+
     /* IFRAME CONTAINER */
     .iframe-container {
       flex: 1;
@@ -444,12 +542,47 @@
       <!-- WELCOME SECTION -->
       <div class="section-container active" id="welcomeSection">
         <div class="welcome-section">
-          <div class="welcome-label">Dashboard</div>
-          <h1 class="user-name" id="userName">Welcome, Student</h1>
-          <div class="proverb" id="proverb">
-            "The beautiful thing about learning is that no one can take it away from you."
-          </div>
+          <div class="welcome-label">Your learning dashboard</div>
+          <h1 class="user-name" id="userName">Loading your welcome...</h1>
+          <p id="careerGoal" class="career-goal">Loading your career goal...</p>
           <div id="statusMessage" class="status-message">Loading your profile...</div>
+        </div>
+
+        <div class="dashboard-grid">
+          <section class="dashboard-card recommendation-card" aria-labelledby="recommendationHeading">
+            <div class="recommendation-kicker">AI-guided focus</div>
+            <h2 id="recommendationHeading" class="recommendation-title">Today's Recommendation</h2>
+            <p id="recommendationReason" class="recommendation-reason">Reviewing your profile, skills, and career path...</p>
+            <button class="dashboard-button" id="recommendationButton" type="button" data-section="courses">View Recommendation</button>
+          </section>
+
+          <section class="dashboard-card" aria-labelledby="nextSkillHeading">
+            <div class="section-heading"><div><h2 id="nextSkillHeading">Next Best Skill</h2><p>Based on your current path</p></div></div>
+            <h3 id="nextSkillName" class="skill-name">Finding your next skill...</h3>
+            <p id="nextSkillReason" class="skill-meta">We are checking your existing skills and career goal.</p>
+            <button class="dashboard-button" id="nextSkillButton" type="button" data-section="skill-recommendations">Start Learning</button>
+          </section>
+        </div>
+
+        <section class="dashboard-card" aria-labelledby="progressHeading" style="margin-top: 1rem;">
+          <div class="section-heading"><div><h2 id="progressHeading">Progress Overview</h2><p>Measured from your saved learning data</p></div></div>
+          <div class="progress-grid">
+            <div class="progress-stat"><span class="progress-stat-label">Skill Progress</span><strong id="skillProgressValue" class="progress-stat-value">--</strong><div class="progress-track"><div id="skillProgressBar" class="progress-fill" style="width:0%"></div></div></div>
+            <div class="progress-stat"><span class="progress-stat-label">Course Progress</span><strong id="courseProgressValue" class="progress-stat-value">--</strong></div>
+            <div class="progress-stat"><span class="progress-stat-label">Projects Completed</span><strong id="projectsValue" class="progress-stat-value">--</strong></div>
+            <div class="progress-stat"><span class="progress-stat-label">Learning Streak</span><strong id="streakValue" class="progress-stat-value">Unavailable</strong></div>
+          </div>
+        </section>
+
+        <div class="dashboard-grid">
+          <section class="dashboard-card" aria-labelledby="continueHeading">
+            <div class="section-heading"><div><h2 id="continueHeading">Continue Learning</h2><p>Active courses and learning items</p></div></div>
+            <div id="learningItems" class="learning-list"><div class="empty-dashboard">Loading your active learning items...</div></div>
+          </section>
+          <section class="dashboard-card" aria-labelledby="activityHeading">
+            <div class="section-heading"><div><h2 id="activityHeading">Recent Activity</h2><p>Updates from your account</p></div></div>
+            <ul id="activityList" class="activity-list"><li class="empty-dashboard">Loading your activity...</li></ul>
+          </section>
         </div>
       </div>
 
@@ -513,6 +646,7 @@
     const userName = document.getElementById('userName');
     const statusMessage = document.getElementById('statusMessage');
     const proverb = document.getElementById('proverb');
+    const careerGoal = document.getElementById('careerGoal');
 
     // State
     let authToken = localStorage.getItem('authToken');
@@ -535,6 +669,10 @@
       sidebarClose.addEventListener('click', closeSidebar);
       logoutButton.addEventListener('click', logout);
 
+      document.querySelectorAll('[data-section]').forEach(button => {
+        button.addEventListener('click', () => navigateToSection(button.getAttribute('data-section')));
+      });
+
       menuItems.forEach(item => {
         item.addEventListener('click', (e) => {
           const section = item.getAttribute('data-section');
@@ -553,7 +691,9 @@
     }
 
     function setRandomProverb() {
-      proverb.textContent = `"${proverbs[Math.floor(Math.random() * proverbs.length)]}"`;
+      if (proverb) {
+        proverb.textContent = `"${proverbs[Math.floor(Math.random() * proverbs.length)]}"`;
+      }
     }
 
     function navigateToSection(section) {
@@ -600,20 +740,104 @@
       }
     }
 
+    async function apiFetch(path) {
+      const response = await fetch(`http://localhost:8001${path}`, {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.detail || 'Request failed');
+      return data;
+    }
+
+    function getGreeting() {
+      const hour = new Date().getHours();
+      if (hour < 12) return 'Good Morning';
+      if (hour < 18) return 'Good Afternoon';
+      return 'Good Evening';
+    }
+
+    function setText(id, value) {
+      const element = document.getElementById(id);
+      if (element) element.textContent = value;
+    }
+
+    function setProgress(id, value) {
+      const safeValue = Math.max(0, Math.min(100, Number(value) || 0));
+      setText(id, `${safeValue}%`);
+      const bar = document.getElementById(id.replace('Value', 'Bar'));
+      if (bar) bar.style.width = `${safeValue}%`;
+    }
+
+    function renderActivity(profile) {
+      const activityList = document.getElementById('activityList');
+      const skills = Array.isArray(profile.skills) ? profile.skills : [];
+      const projects = Array.isArray(profile.projects) ? profile.projects : [];
+      const activity = [];
+      if (skills.length) activity.push(`${skills.length} skill${skills.length === 1 ? '' : 's'} saved to your profile`);
+      if (projects.length) activity.push(`${projects.length} project${projects.length === 1 ? '' : 's'} added to your portfolio`);
+      if (profile.career_goal?.target_career || profile.career_goal?.preferred_role) activity.push('Career goal is set for personalized recommendations');
+
+      if (!activity.length) {
+        activityList.innerHTML = '<li class="empty-dashboard">No recent activity is available yet. Add skills, projects, or a career goal to see updates here.</li>';
+        return;
+      }
+
+      activityList.innerHTML = activity.map(item => `<li class="activity-item"><span class="activity-dot" aria-hidden="true"></span><span>${item}</span></li>`).join('');
+    }
+
+    function renderLearningItems() {
+      document.getElementById('learningItems').innerHTML = '<div class="empty-dashboard">No active course enrollments are available yet. Explore Recommended Courses to choose your next learning item.</div>';
+    }
+
+    function renderRecommendation(courseData) {
+      const recommendation = courseData?.recommendations?.[0];
+      if (!recommendation) {
+        setText('recommendationReason', 'Complete your profile and add a career goal to unlock a recommendation tailored to your path.');
+        return;
+      }
+      setText('recommendationReason', `${recommendation.course_name} will build ${recommendation.skill}. ${recommendation.why}`);
+    }
+
+    function renderNextSkill(adaptiveData) {
+      const recommendation = adaptiveData?.recommendations?.[0];
+      if (!recommendation) {
+        setText('nextSkillName', 'No skill recommendation yet');
+        setText('nextSkillReason', 'Add a career goal or complete a skill assessment to receive your next targeted skill.');
+        return;
+      }
+      setText('nextSkillName', recommendation.skill);
+      setText('nextSkillReason', recommendation.why || 'This skill is aligned with your current career path.');
+    }
+
     async function loadDashboard() {
       try {
-        const response = await fetch('http://localhost:8001/me', {
-          headers: { Authorization: `Bearer ${authToken}` }
-        });
-
-        if (!response.ok) throw new Error('Session expired');
-
-        const data = await response.json();
+        const [data, profileResult, progressResult, courseResult, adaptiveResult] = await Promise.all([
+          apiFetch('/me'),
+          apiFetch('/profile').catch(() => null),
+          apiFetch('/api/student/learning-progress').catch(() => null),
+          apiFetch('/api/student/course-recommendations').catch(() => null),
+          apiFetch('/api/student/adaptive-recommendations').catch(() => null)
+        ]);
         const firstName = data.full_name ? data.full_name.split(' ')[0] : 'Student';
-        userName.textContent = `Welcome, ${firstName}`;
-        statusMessage.textContent = 'You are signed in and authenticated successfully.';
+        userName.textContent = `${getGreeting()}, ${firstName} 👋`;
+        const profile = profileResult || {};
+        const goal = profile.career_goal?.target_career || profile.career_goal?.preferred_role;
+        careerGoal.textContent = goal ? `Your current career goal: ${goal}` : 'Add a career goal to personalize your learning path.';
+        statusMessage.textContent = 'Your dashboard is personalized from your saved learning data.';
         statusMessage.classList.remove('error');
+
+        const progress = progressResult || {};
+        const overallProgress = Number(progress.overall_learning_progress);
+        setProgress('skillProgressValue', Number.isFinite(overallProgress) ? overallProgress : 0);
+        setText('courseProgressValue', progress.courses_completed || 'Unavailable');
+        setText('projectsValue', 'Unavailable');
+        renderRecommendation(courseResult);
+        renderNextSkill(adaptiveResult);
+        renderLearningItems();
+        renderActivity(profile);
       } catch (error) {
+        userName.textContent = 'Welcome, Student';
+        careerGoal.textContent = 'Your profile could not be loaded.';
         statusMessage.textContent = 'Authentication failed. Please log in again.';
         statusMessage.classList.add('error');
         localStorage.removeItem('authToken');
