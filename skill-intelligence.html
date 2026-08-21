@@ -287,6 +287,8 @@
   </main>
 
   <script>
+    const API_BASE = window.__API_BASE__ || 'http://localhost:8001';
+
     // Get auth token from localStorage, sessionStorage, or URL parameter (for iframe usage)
     let authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
     
@@ -419,7 +421,7 @@
 
     async function loadAssessmentSkills() {
       try {
-        const data = await apiFetch('http://localhost:8001/api/student/assessment/skills');
+        const data = await apiFetch(`${API_BASE}/api/student/assessment/skills`);
         const skills = data.skills || [];
         populateAssessmentSkills(skills);
       } catch (error) {
@@ -497,7 +499,7 @@
       }
 
       try {
-        const data = await apiFetch(`http://localhost:8001/api/student/assessment/questions?skill_name=${encodeURIComponent(skillName)}`);
+        const data = await apiFetch(`${API_BASE}/api/student/assessment/questions?skill_name=${encodeURIComponent(skillName)}`);
         state.assessmentQuestions = data.questions || [];
         state.currentQuestionIndex = 0;
         state.answers = [];
@@ -531,7 +533,7 @@
       }
 
       try {
-        const result = await apiFetch('http://localhost:8001/api/student/assessment/submit', {
+        const result = await apiFetch(`${API_BASE}/api/student/assessment/submit`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ skill_name: skillName, answers: fullAnswers }),
@@ -639,10 +641,10 @@
     async function loadDashboardData() {
       try {
         const [gap, dashboard, recommendations, results] = await Promise.all([
-          apiFetch('http://localhost:8001/api/student/skill-gap'),
-          apiFetch('http://localhost:8001/api/student/skill-dashboard'),
-          apiFetch('http://localhost:8001/api/student/recommendations'),
-          apiFetch('http://localhost:8001/api/student/assessment-results'),
+          apiFetch(`${API_BASE}/api/student/skill-gap`),
+          apiFetch(`${API_BASE}/api/student/skill-dashboard`),
+          apiFetch(`${API_BASE}/api/student/recommendations`),
+          apiFetch(`${API_BASE}/api/student/assessment-results`),
         ]);
 
         state.skillGap = gap;

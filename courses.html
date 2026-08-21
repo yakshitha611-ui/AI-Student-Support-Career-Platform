@@ -123,7 +123,7 @@
   </main>
 
   <script>
-    const API_BASE = 'http://localhost:8001';
+    const API_BASE = window.__API_BASE__ || 'http://localhost:8001';
 
     function getAuthHeaders() {
       // Check localStorage, sessionStorage, and URL parameters for auth token

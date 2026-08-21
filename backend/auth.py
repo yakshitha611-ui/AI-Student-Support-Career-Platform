@@ -8,7 +8,9 @@ from passlib.context import CryptContext
 
 from models import User
 
-SECRET_KEY = os.getenv("SECRET_KEY", "super-secret-key-change-me")
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY must be set before starting the backend.")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 

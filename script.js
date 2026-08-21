@@ -6,6 +6,7 @@ const formError = document.getElementById('formError');
 
 const emailError = document.getElementById('emailError');
 const passwordError = document.getElementById('passwordError');
+const API_BASE = window.__API_BASE__ || 'http://localhost:8001';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -71,7 +72,7 @@ form.addEventListener('submit', async (event) => {
   };
 
   try {
-    const response = await fetch('http://localhost:8001/api/login', {
+    const response = await fetch(`${API_BASE}/api/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
