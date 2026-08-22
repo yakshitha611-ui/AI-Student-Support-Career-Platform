@@ -2,7 +2,7 @@
 
 ## Test Environment
 - Browser: Any modern browser (Chrome, Firefox, Safari, Edge)
-- Backend: http://localhost:8001 (API)
+- Backend: http://ai-student-support-career-platform-4.onrender.com (API)
 - Frontend: http://localhost:5173 or direct file access
 - Test User: Any registered student account
 

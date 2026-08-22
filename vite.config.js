@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => {
         name: 'inject-api-config',
         transformIndexHtml(html) {
           return {
-            html: apiUrl ? html.replaceAll('http://localhost:8001', apiUrl) : html,
+            html: apiUrl ? html.replaceAll('http://ai-student-support-career-platform-4.onrender.com', apiUrl) : html,
             tags: [{
               tag: 'script',
               children: `window.__API_BASE__ = ${JSON.stringify(apiUrl)};`,

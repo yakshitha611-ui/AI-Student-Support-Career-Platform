@@ -2,7 +2,7 @@ import json
 import urllib.request
 import sys
 
-base = 'http://localhost:8001'
+base = 'http://ai-student-support-career-platform-4.onrender.com'
 
 req = urllib.request.Request(
     base + '/login',

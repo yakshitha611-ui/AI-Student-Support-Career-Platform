@@ -6,7 +6,7 @@ const formError = document.getElementById('formError');
 
 const emailError = document.getElementById('emailError');
 const passwordError = document.getElementById('passwordError');
-const API_BASE = window.__API_BASE__ || 'http://localhost:8001';
+const API_BASE = window.__API_BASE__ || 'http://ai-student-support-career-platform-4.onrender.com';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
